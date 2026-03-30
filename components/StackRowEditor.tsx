@@ -16,9 +16,9 @@ export function StackRowEditor({ index, row, onChangeRow, onDeleteRow, errors = 
 
   return (
     <Fragment>
-      <tr className={`group border-b border-slate-200 transition-colors hover:bg-slate-100 ${zebra}`}>
-        <td className="px-4 py-4 text-center text-sm font-semibold text-slate-500 align-middle">{index}</td>
-        <td className="px-4 py-4 align-middle">
+      <tr className={`group transition-colors hover:bg-neutral-50 ${zebra}`}>
+        <td className="border-b border-r border-neutral-900 px-3 py-3 text-center text-sm font-semibold text-neutral-700 align-middle tabular-nums">{index}</td>
+        <td className="border-b border-r border-neutral-900 px-2 py-2 align-middle">
           <FieldInput
             value={row.label}
             onChange={(value) => onChangeRow(row.id, "label", value)}
@@ -27,7 +27,7 @@ export function StackRowEditor({ index, row, onChangeRow, onDeleteRow, errors = 
             align="left"
           />
         </td>
-        <td className="px-4 py-4 align-middle">
+        <td className="border-b border-r border-neutral-900 px-2 py-2 align-middle">
           <FieldInput
             value={row.nominal}
             onChange={(value) => onChangeRow(row.id, "nominal", value)}
@@ -36,7 +36,7 @@ export function StackRowEditor({ index, row, onChangeRow, onDeleteRow, errors = 
             align="right"
           />
         </td>
-        <td className="px-4 py-4 align-middle">
+        <td className="border-b border-r border-neutral-900 px-2 py-2 align-middle">
           <FieldInput
             value={row.plusTolerance}
             onChange={(value) => onChangeRow(row.id, "plusTolerance", value)}
@@ -45,7 +45,7 @@ export function StackRowEditor({ index, row, onChangeRow, onDeleteRow, errors = 
             align="right"
           />
         </td>
-        <td className="px-4 py-4 align-middle">
+        <td className="border-b border-r border-neutral-900 px-2 py-2 align-middle">
           <FieldInput
             value={row.minusTolerance}
             onChange={(value) => onChangeRow(row.id, "minusTolerance", value)}
@@ -54,21 +54,21 @@ export function StackRowEditor({ index, row, onChangeRow, onDeleteRow, errors = 
             align="right"
           />
         </td>
-        <td className="px-4 py-4 align-middle">
+        <td className="border-b border-r border-neutral-900 px-2 py-2 align-middle">
           <DirectionToggle
             value={row.direction}
             onChange={(value) => onChangeRow(row.id, "direction", value)}
             invalid={Boolean(errors.direction)}
           />
         </td>
-        <td className="px-4 py-4 text-right align-middle font-mono text-sm font-semibold tabular-nums text-slate-700">
+        <td className="border-b border-r border-neutral-900 px-3 py-3 text-right align-middle font-mono text-sm font-semibold tabular-nums text-neutral-950">
           {contribution}
         </td>
-        <td className="px-4 py-4 text-center align-middle">
+        <td className="border-b border-neutral-900 px-2 py-2 text-center align-middle">
           <button
             type="button"
             onClick={() => onDeleteRow(row.id)}
-            className="inline-flex items-center justify-center rounded-full bg-rose-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-300"
+            className="inline-flex items-center justify-center border border-neutral-900 bg-white px-3 py-2 text-xs font-semibold text-neutral-900 transition hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-neutral-400"
           >
             Delete
           </button>
@@ -76,11 +76,11 @@ export function StackRowEditor({ index, row, onChangeRow, onDeleteRow, errors = 
       </tr>
 
       {hasErrors ? (
-        <tr className="border-b border-slate-200 bg-rose-50/70">
-          <td colSpan={8} className="px-4 py-3 text-xs leading-5 text-rose-700">
+        <tr className="border-b border-neutral-900 bg-neutral-100">
+          <td colSpan={8} className="px-3 py-2 text-xs leading-5 text-neutral-700">
             <div className="flex flex-wrap gap-x-4 gap-y-1">
               {Object.values(errors).map((message) => (
-                <span key={message} className="rounded-full border border-rose-200 bg-white px-2.5 py-1">
+                <span key={message} className="border border-neutral-900 bg-white px-2 py-1">
                   {message}
                 </span>
               ))}
@@ -110,9 +110,9 @@ function FieldInput({
       value={value}
       onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
-      className={`block w-full min-w-0 rounded-xl border bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:bg-slate-50 focus:ring-2 focus:ring-slate-200 ${
+      className={`block w-full min-w-0 border bg-white px-2.5 py-2 text-sm text-neutral-950 outline-none transition placeholder:text-neutral-400 focus:bg-neutral-50 ${
         align === "right" ? "text-right tabular-nums" : "text-left"
-      } ${invalid ? "border-rose-300 ring-1 ring-inset ring-rose-300" : "border-slate-200"}`}
+      } ${invalid ? "border-neutral-900 ring-1 ring-inset ring-neutral-900" : "border-neutral-900"}`}
     />
   );
 }
@@ -126,21 +126,21 @@ function DirectionToggle({
   onChange: (value: StackRow["direction"]) => void;
   invalid?: boolean;
 }) {
-  const base = "inline-flex items-center justify-center rounded-full px-3 py-2 text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-slate-300";
+  const base = "inline-flex items-center justify-center px-3 py-2 text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-neutral-400";
 
   return (
-    <div className={`inline-flex w-full items-center gap-2 rounded-full border bg-white p-1 shadow-sm ${invalid ? "border-rose-300 ring-1 ring-inset ring-rose-300" : "border-slate-200"}`}>
+    <div className={`inline-flex w-full items-center gap-1 border bg-white p-1 ${invalid ? "border-neutral-900 ring-1 ring-inset ring-neutral-900" : "border-neutral-900"}`}>
       <button
         type="button"
         onClick={() => onChange("+")}
-        className={`${base} w-1/2 ${value === "+" ? "bg-emerald-600 text-white" : "bg-slate-50 text-slate-600 hover:bg-slate-100"}`}
+        className={`${base} w-1/2 ${value === "+" ? "bg-neutral-900 text-white" : "bg-white text-neutral-700 hover:bg-neutral-100"}`}
       >
         +
       </button>
       <button
         type="button"
         onClick={() => onChange("-")}
-        className={`${base} w-1/2 ${value === "-" ? "bg-rose-600 text-white" : "bg-slate-50 text-slate-600 hover:bg-slate-100"}`}
+        className={`${base} w-1/2 ${value === "-" ? "bg-neutral-900 text-white" : "bg-white text-neutral-700 hover:bg-neutral-100"}`}
       >
         -
       </button>

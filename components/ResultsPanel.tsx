@@ -11,15 +11,15 @@ interface ResultsPanelProps {
 
 export function ResultsPanel({ result, isValid, errorCount, errors, zeroToleranceRows }: ResultsPanelProps) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="flex items-start justify-between gap-4">
+    <section className="border border-neutral-900 bg-white p-4">
+      <div className="flex items-start justify-between gap-4 border-b border-neutral-900 pb-3">
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">Results</h2>
-          <p className="mt-1 text-sm text-slate-500">F-01 total nominal, F-02 worst-case, and F-03 RSS approximation.</p>
+          <h2 className="text-lg font-semibold tracking-tight text-neutral-950">Results</h2>
+          <p className="mt-1 text-sm text-neutral-700">F-01 total nominal, F-02 worst-case, and F-03 RSS approximation.</p>
         </div>
         <span
-          className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
-            isValid ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
+          className={`border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
+            isValid ? "border-neutral-900 bg-neutral-100 text-neutral-900" : "border-neutral-900 bg-white text-neutral-900"
           }`}
         >
           {isValid ? "Valid" : "Blocked"}
@@ -27,7 +27,7 @@ export function ResultsPanel({ result, isValid, errorCount, errors, zeroToleranc
       </div>
 
       {!isValid ? (
-        <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+        <div className="mt-4 border border-neutral-900 bg-neutral-100 p-3 text-sm text-neutral-800">
           <p>
             Fix the highlighted inputs to calculate results. {errorCount} validation issue{errorCount === 1 ? "" : "s"}{" "}
             are active.
@@ -51,17 +51,17 @@ export function ResultsPanel({ result, isValid, errorCount, errors, zeroToleranc
         </div>
       ) : null}
 
-      <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+      <div className="mt-4 border border-neutral-900 bg-neutral-100 p-3 text-sm leading-6 text-neutral-700">
         RSS is shown as an approximation. Worst-case is deterministic and conservative.
       </div>
 
-      <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500">
+      <div className="mt-3 border border-neutral-900 bg-white p-3 text-xs leading-5 text-neutral-600">
         Output is formatted for engineering review: nominal values are exact, worst-case is conservative, and RSS is a
         statistical estimate.
       </div>
 
       {isValid && zeroToleranceRows > 0 ? (
-        <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-700">
+        <div className="mt-3 border border-neutral-900 bg-neutral-100 p-3 text-sm leading-6 text-neutral-800">
           {zeroToleranceRows} row{zeroToleranceRows === 1 ? "" : "s"} use zero tolerance and remain valid.
         </div>
       ) : null}
@@ -79,15 +79,15 @@ function MetricCard({
   accent: "slate" | "blue" | "amber";
 }) {
   const accentClasses = {
-    slate: "border-slate-200 bg-slate-50",
-    blue: "border-sky-200 bg-sky-50",
-    amber: "border-amber-200 bg-amber-50"
+    slate: "border-neutral-900 bg-neutral-100",
+    blue: "border-neutral-900 bg-white",
+    amber: "border-neutral-900 bg-neutral-100"
   }[accent];
 
   return (
-    <div className={`rounded-2xl border p-4 ${accentClasses}`}>
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-slate-900">{value}</p>
+    <div className={`border p-3 ${accentClasses}`}>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-600">{label}</p>
+      <p className="mt-2 text-2xl font-semibold text-neutral-950 tabular-nums">{value}</p>
     </div>
   );
 }
