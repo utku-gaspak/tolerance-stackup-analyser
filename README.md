@@ -2,6 +2,8 @@
 
 Engineering-focused 1D tolerance stackup calculator built with Next.js, TypeScript, and Tailwind CSS.
 
+Live app: https://tolstackup.com
+
 The UI is intentionally industrial and worksheet-like: black/white/gray, compact tables, explicit borders, and panel-based engineering output.
 
 ## What It Does
