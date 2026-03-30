@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ResultsPanel } from "../components/ResultsPanel";
+import { FormulaPanel } from "../components/FormulaPanel";
 import { StackTable } from "../components/StackTable";
 import { defaultSampleRows, samplePresets } from "../lib/sample-data";
 import { calculateStackup } from "../lib/stackup";
@@ -102,14 +103,6 @@ export default function Home() {
         />
 
         <div className="flex flex-col gap-6">
-          <ResultsPanel
-            result={result}
-            isValid={validation.isValid}
-            errorCount={validation.errors.length}
-            errors={validation.errors}
-            zeroToleranceRows={zeroToleranceRows}
-          />
-
           <aside className="flex h-full flex-col gap-3 border border-neutral-900 bg-white p-5 text-neutral-900">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-700">Status</p>
             <h2 className="text-xl font-semibold text-neutral-950">Core scaffold is live</h2>
@@ -123,6 +116,16 @@ export default function Home() {
               <p className="mt-2 text-3xl font-semibold text-neutral-950 tabular-nums">{rows.length}</p>
             </div>
           </aside>
+
+          <ResultsPanel
+            result={result}
+            isValid={validation.isValid}
+            errorCount={validation.errors.length}
+            errors={validation.errors}
+            zeroToleranceRows={zeroToleranceRows}
+          />
+
+          <FormulaPanel rows={rows} />
         </div>
       </section>
     </main>
