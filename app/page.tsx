@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ResultsPanel } from "../components/ResultsPanel";
 import { FormulaPanel } from "../components/FormulaPanel";
+import { MonteCarloPanel } from "../components/MonteCarloPanel";
 import { StackTable } from "../components/StackTable";
 import { defaultSampleRows, samplePresets } from "../lib/sample-data";
 import { calculateStackup } from "../lib/stackup";
@@ -126,6 +127,8 @@ export default function Home() {
           />
 
           <FormulaPanel rows={rows} />
+
+          <MonteCarloPanel rows={validation.parsedRows} isValid={validation.isValid} />
         </div>
       </section>
     </main>
