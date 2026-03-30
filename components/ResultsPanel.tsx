@@ -11,7 +11,7 @@ interface ResultsPanelProps {
 
 export function ResultsPanel({ result, isValid, errorCount, errors, zeroToleranceRows }: ResultsPanelProps) {
   return (
-    <section className="border border-neutral-900 bg-white p-4">
+    <section className="flex h-full flex-col border border-neutral-900 bg-white p-4">
       <div className="flex items-start justify-between gap-4 border-b border-neutral-900 pb-3">
         <div>
           <h2 className="text-lg font-semibold tracking-tight text-neutral-950">Results</h2>
@@ -41,7 +41,7 @@ export function ResultsPanel({ result, isValid, errorCount, errors, zeroToleranc
       ) : null}
 
       {result ? (
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="mt-6 grid auto-rows-min items-start content-start gap-4 sm:grid-cols-2">
           <MetricCard label="Total nominal" value={formatNumber(result.totalNominal)} accent="slate" />
           <MetricCard label="Worst-case min" value={formatNumber(result.worstCaseMin)} accent="blue" />
           <MetricCard label="Worst-case max" value={formatNumber(result.worstCaseMax)} accent="blue" />
@@ -51,20 +51,22 @@ export function ResultsPanel({ result, isValid, errorCount, errors, zeroToleranc
         </div>
       ) : null}
 
-      <div className="mt-4 border border-neutral-900 bg-neutral-100 p-3 text-sm leading-6 text-neutral-700">
-        RSS is shown as an approximation. Worst-case is deterministic and conservative.
-      </div>
-
-      <div className="mt-3 border border-neutral-900 bg-white p-3 text-xs leading-5 text-neutral-600">
-        Output is formatted for engineering review: nominal values are exact, worst-case is conservative, and RSS is a
-        statistical estimate.
-      </div>
-
-      {isValid && zeroToleranceRows > 0 ? (
-        <div className="mt-3 border border-neutral-900 bg-neutral-100 p-3 text-sm leading-6 text-neutral-800">
-          {zeroToleranceRows} row{zeroToleranceRows === 1 ? "" : "s"} use zero tolerance and remain valid.
+      <div className="mt-4 space-y-4">
+        <div className="border border-neutral-900 bg-neutral-100 p-3 text-sm leading-6 text-neutral-700">
+          RSS is shown as an approximation. Worst-case is deterministic and conservative.
         </div>
-      ) : null}
+
+        <div className="border border-neutral-900 bg-white p-3 text-xs leading-5 text-neutral-600">
+          Output is formatted for engineering review: nominal values are exact, worst-case is conservative, and RSS is a
+          statistical estimate.
+        </div>
+
+        {isValid && zeroToleranceRows > 0 ? (
+          <div className="border border-neutral-900 bg-neutral-100 p-3 text-sm leading-6 text-neutral-800">
+            {zeroToleranceRows} row{zeroToleranceRows === 1 ? "" : "s"} use zero tolerance and remain valid.
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }

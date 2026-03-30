@@ -74,12 +74,12 @@ export function StackTable({
           <table className="w-full table-fixed border-collapse">
             <colgroup>
               <col className="w-10" />
-              <col className="w-[16%] min-w-[8rem]" />
+              <col className="w-[12.8%] min-w-[6.4rem]" />
               <col className="w-28" />
               <col className="w-28" />
               <col className="w-28" />
-              <col className="w-40" />
-              <col className="w-36" />
+              <col className="w-[6.75rem]" />
+              <col className="w-[8.1rem]" />
               <col className="w-24" />
             </colgroup>
             <thead className="bg-neutral-200 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">

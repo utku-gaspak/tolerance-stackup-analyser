@@ -93,7 +93,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,0.95fr)_minmax(0,0.95fr)]">
+      <section className="grid items-stretch gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,0.95fr)_minmax(0,0.95fr)]">
         <StackTable
           rows={rows}
           onAddRow={addRow}
@@ -106,7 +106,7 @@ export default function Home() {
 
         <MonteCarloPanel rows={validation.parsedRows} isValid={validation.isValid} />
 
-        <div className="flex flex-col gap-6">
+        <div className="flex h-full flex-col gap-6">
           <ResultsPanel
             result={result}
             isValid={validation.isValid}
@@ -132,6 +132,29 @@ export default function Home() {
           </div>
         </aside>
       </section>
+
+      <footer className="border-t border-neutral-900 pt-4 text-xs text-neutral-700">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-neutral-700">&copy; 2026 Utku Gaspak</p>
+          <p className="text-neutral-700">Engineering calculator for 1D stackups</p>
+          <div className="flex flex-wrap gap-4">
+            <a
+              href="https://github.com/utku-gaspak"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-neutral-950 underline decoration-neutral-400 decoration-1 underline-offset-2 hover:decoration-neutral-900"
+            >
+              GitHub
+            </a>
+            <a
+              href="mailto:utkugaspak@gmail.com"
+              className="font-medium text-neutral-950 underline decoration-neutral-400 decoration-1 underline-offset-2 hover:decoration-neutral-900"
+            >
+              utkugaspak@gmail.com
+            </a>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
