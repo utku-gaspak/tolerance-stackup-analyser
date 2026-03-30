@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ResultsPanel } from "../components/ResultsPanel";
+import { CurrentStackExpressionPanel } from "../components/CurrentStackExpressionPanel";
 import { FormulaPanel } from "../components/FormulaPanel";
 import { MonteCarloPanel } from "../components/MonteCarloPanel";
 import { StackTable } from "../components/StackTable";
@@ -52,8 +53,8 @@ export default function Home() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-8xl flex-col gap-6 px-3 py-4 sm:px-5 lg:px-6">
-      <section className="flex flex-col gap-3 border border-neutral-900 bg-white p-5">
+    <main className="mx-auto flex min-h-screen w-full max-w-8xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
+      <section className="flex flex-col gap-3 border border-neutral-900 bg-white p-5 lg:p-6">
         <div className="flex flex-col gap-2">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-700">Engineering calculator</p>
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-950 sm:text-4xl">
@@ -92,7 +93,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(340px,0.9fr)]">
+      <section className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,0.95fr)_minmax(0,0.95fr)]">
         <StackTable
           rows={rows}
           onAddRow={addRow}
@@ -103,21 +104,9 @@ export default function Home() {
           equationIsValid={validation.isValid}
         />
 
+        <MonteCarloPanel rows={validation.parsedRows} isValid={validation.isValid} />
+
         <div className="flex flex-col gap-6">
-          <aside className="flex h-full flex-col gap-3 border border-neutral-900 bg-white p-5 text-neutral-900">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-700">Status</p>
-            <h2 className="text-xl font-semibold text-neutral-950">Core scaffold is live</h2>
-            <p className="text-sm leading-6 text-neutral-700">
-              The app shell, sample presets, editable rows, and calculation results are wired together. Validation now
-              blocks incorrect input.
-            </p>
-
-            <div className="mt-1 border border-neutral-900 bg-neutral-100 p-4">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-neutral-700">Current rows</p>
-              <p className="mt-2 text-3xl font-semibold text-neutral-950 tabular-nums">{rows.length}</p>
-            </div>
-          </aside>
-
           <ResultsPanel
             result={result}
             isValid={validation.isValid}
@@ -125,11 +114,23 @@ export default function Home() {
             errors={validation.errors}
             zeroToleranceRows={zeroToleranceRows}
           />
-
-          <FormulaPanel rows={rows} />
-
-          <MonteCarloPanel rows={validation.parsedRows} isValid={validation.isValid} />
         </div>
+      </section>
+
+      <section className="grid gap-5 xl:grid-cols-3 xl:items-stretch">
+        <FormulaPanel rows={rows} compact />
+        <CurrentStackExpressionPanel rows={rows} />
+        <aside className="h-full border border-neutral-900 bg-neutral-100 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-700">Status</p>
+          <h2 className="mt-1 text-sm font-semibold tracking-tight text-neutral-950">Core scaffold is live</h2>
+          <p className="mt-2 text-xs leading-5 text-neutral-700">
+            Validation, deterministic results, formula reference, and Monte Carlo are connected.
+          </p>
+          <div className="mt-3 border border-neutral-900 bg-white px-3 py-2">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-600">Current rows</p>
+            <p className="mt-1 text-2xl font-semibold text-neutral-950 tabular-nums">{rows.length}</p>
+          </div>
+        </aside>
       </section>
     </main>
   );
