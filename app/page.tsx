@@ -91,6 +91,8 @@ export default function Home() {
           onDeleteRow={deleteRow}
           onChangeRow={updateRow}
           errorsByRow={errorsByRow}
+          equationTotal={result?.totalNominal ?? null}
+          equationIsValid={validation.isValid}
         />
 
         <div className="flex flex-col gap-6">
