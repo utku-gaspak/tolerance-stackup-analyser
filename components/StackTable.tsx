@@ -63,6 +63,10 @@ export function StackTable({
             </span>
           ))}
         </div>
+        <p className="mt-3 text-xs leading-5 text-slate-500">
+          Contribution is the signed nominal term used in the equation. Tolerance propagation is shown separately in the
+          results panel.
+        </p>
       </div>
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200">

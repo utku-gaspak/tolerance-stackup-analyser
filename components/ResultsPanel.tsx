@@ -55,6 +55,11 @@ export function ResultsPanel({ result, isValid, errorCount, errors, zeroToleranc
         RSS is shown as an approximation. Worst-case is deterministic and conservative.
       </div>
 
+      <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500">
+        Output is formatted for engineering review: nominal values are exact, worst-case is conservative, and RSS is a
+        statistical estimate.
+      </div>
+
       {isValid && zeroToleranceRows > 0 ? (
         <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-700">
           {zeroToleranceRows} row{zeroToleranceRows === 1 ? "" : "s"} use zero tolerance and remain valid.

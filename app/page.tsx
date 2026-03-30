@@ -63,6 +63,12 @@ export default function Home() {
           </p>
         </div>
 
+        <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">F-01 / F-02 / F-03</span>
+          <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">V-01 to V-05</span>
+          <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">Units: mm</span>
+        </div>
+
         <div className="flex flex-wrap gap-3">
           {PRESET_LABELS.map((preset) => (
             <button
