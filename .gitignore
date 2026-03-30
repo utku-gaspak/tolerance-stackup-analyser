@@ -1,0 +1,6 @@
+tolerance-stackup-builder-agent/
+node_modules/
+.next/
+dist/
+coverage/
+.DS_Store
