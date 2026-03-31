@@ -117,20 +117,23 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-3 xl:items-stretch">
+      <section className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
         <FormulaPanel rows={rows} compact />
-        <CurrentStackExpressionPanel rows={rows} />
-        <aside className="h-full border border-neutral-900 bg-neutral-100 p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-700">Status</p>
-          <h2 className="mt-1 text-sm font-semibold tracking-tight text-neutral-950">Core scaffold is live</h2>
-          <p className="mt-2 text-xs leading-5 text-neutral-700">
-            Validation, deterministic results, formula reference, and Monte Carlo are connected.
-          </p>
-          <div className="mt-3 border border-neutral-900 bg-white px-3 py-2">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-600">Current rows</p>
-            <p className="mt-1 text-2xl font-semibold text-neutral-950 tabular-nums">{rows.length}</p>
-          </div>
-        </aside>
+
+        <div className="grid gap-4 content-start">
+          <CurrentStackExpressionPanel rows={rows} />
+          <aside className="border border-neutral-900 bg-neutral-100 p-3.5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-700">Status</p>
+            <h2 className="mt-1 text-sm font-semibold tracking-tight text-neutral-950">Core scaffold is live</h2>
+            <p className="mt-2 text-[10.5px] leading-[1.1rem] text-neutral-700">
+              Validation, results, formula reference, and Monte Carlo are connected.
+            </p>
+            <div className="mt-2.5 border border-neutral-900 bg-white px-3 py-2">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-600">Current rows</p>
+              <p className="mt-1 text-2xl font-semibold text-neutral-950 tabular-nums">{rows.length}</p>
+            </div>
+          </aside>
+        </div>
       </section>
 
       <footer className="border-t border-neutral-900 pt-4 text-xs text-neutral-700">

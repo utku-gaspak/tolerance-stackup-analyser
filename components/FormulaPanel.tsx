@@ -10,33 +10,57 @@ export function FormulaPanel({ rows, compact = false }: FormulaPanelProps) {
 
   if (compact) {
     return (
-      <section className="h-full border border-neutral-900 bg-neutral-100 p-3">
+      <section className="h-full border border-neutral-900 bg-neutral-100 p-2.5">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Formula reference</p>
             <h2 className="mt-1 text-sm font-semibold tracking-tight text-neutral-950">How the stack is calculated</h2>
           </div>
         </div>
-        <div className="mt-3 grid gap-2 text-[11px] leading-5 text-neutral-700 xl:grid-cols-3">
+        <div className="mt-2.5 grid gap-4 text-[10.5px] leading-[1.1rem] text-neutral-700 xl:grid-cols-3">
           <CompactFormula
             id="F-01"
             title="Total nominal stack"
             formula="Σ(direction_i × n_i)"
-            note="Adds + rows and subtracts - rows to get the baseline stack value."
+            note="Adds + rows, subtracts - rows."
           />
           <CompactFormula
             id="F-02"
             title="Worst-case bounds"
             formula="local_min = n_i - t_minus_i, local_max = n_i + t_plus_i"
-            note="+ rows use local_min/local_max directly; - rows invert the contribution."
+            note="+ rows use local bounds directly."
           />
           <CompactFormula
             id="F-03"
             title="RSS approximation"
             formula="RSS_tol = sqrt(Σ(((t_plus_i + t_minus_i)/2)^2))"
-            note="Used only as an approximation band, not a replacement for worst-case."
+            note="Approximation band, not worst-case."
           />
         </div>
+
+        <article className="mt-4 border border-neutral-900 bg-white px-3 py-2">
+          <div className="flex items-center justify-between gap-3 border-b border-neutral-900 pb-1.5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Assumptions</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-600">Modeling notes</p>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10.5px] leading-[1.1rem] text-neutral-700">
+            <span>1D linear chain only</span>
+            <span>RSS assumes independence</span>
+            <span>Asymmetric tolerances supported</span>
+            <span>Monte Carlo is an estimate</span>
+          </div>
+        </article>
+
+        <article className="mt-4 border border-neutral-900 bg-white px-3 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Validation cases</p>
+          <div className="mt-2 flex flex-wrap gap-2 text-[10.5px] leading-[1.1rem] text-neutral-700">
+            <span className="border border-neutral-900 bg-neutral-100 px-2 py-0.5">V-01 All positive</span>
+            <span className="border border-neutral-900 bg-neutral-100 px-2 py-0.5">V-02 Mixed directions</span>
+            <span className="border border-neutral-900 bg-neutral-100 px-2 py-0.5">V-03 Asymmetric tolerances</span>
+            <span className="border border-neutral-900 bg-neutral-100 px-2 py-0.5">V-04 Zero tolerance</span>
+            <span className="border border-neutral-900 bg-neutral-100 px-2 py-0.5">V-05 Invalid input</span>
+          </div>
+        </article>
       </section>
     );
   }
@@ -91,11 +115,11 @@ function CompactFormula({
   note: string;
 }) {
   return (
-    <article className="border border-neutral-900 bg-white p-2">
+    <article className="border border-neutral-900 bg-white p-1.5">
       <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-600">{id}</p>
       <h3 className="mt-1 text-xs font-semibold text-neutral-950">{title}</h3>
-      <p className="mt-1 font-mono text-[11px] leading-5 text-neutral-950 tabular-nums">{formula}</p>
-      <p className="mt-1 text-[11px] leading-5 text-neutral-700">{note}</p>
+      <p className="mt-0.5 font-mono text-[10.5px] leading-[1.1rem] text-neutral-950 tabular-nums">{formula}</p>
+      <p className="mt-0.5 text-[10.5px] leading-[1.1rem] text-neutral-700">{note}</p>
     </article>
   );
 }
