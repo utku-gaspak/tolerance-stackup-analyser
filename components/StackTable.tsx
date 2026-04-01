@@ -1,3 +1,6 @@
+"use client";
+
+import { useRef, type ChangeEvent } from "react";
 import type { RowValidationError, StackDirection, StackRow } from "../lib/types";
 import { StackRowEditor } from "./StackRowEditor";
 
@@ -6,6 +9,7 @@ interface StackTableProps {
   onChangeRow: (id: string, field: keyof StackRow, value: string) => void;
   onDeleteRow: (id: string) => void;
   onAddRow: () => void;
+  onImportRows: (file: File) => void;
   onExportRows: () => void;
   errorsByRow: Record<string, Partial<Record<RowValidationError["field"], string>>>;
   equationTotal: number | null;
@@ -17,15 +21,31 @@ export function StackTable({
   onChangeRow,
   onDeleteRow,
   onAddRow,
+  onImportRows,
   onExportRows,
   errorsByRow,
   equationTotal,
   equationIsValid
 }: StackTableProps) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const equationTokens = rows.map((row, index) => ({
     index: index + 1,
     signedNominal: formatSignedNominal(row.nominal, row.direction)
   }));
+
+  function openImportDialog() {
+    fileInputRef.current?.click();
+  }
+
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (file) {
+      onImportRows(file);
+    }
+
+    event.target.value = "";
+  }
 
   return (
     <section className="border border-neutral-900 bg-white p-4">
@@ -44,6 +64,13 @@ export function StackTable({
           </button>
           <button
             type="button"
+            onClick={openImportDialog}
+            className="border border-neutral-900 bg-white px-3 py-2 text-sm font-medium text-neutral-900 transition hover:bg-neutral-100"
+          >
+            Import CSV
+          </button>
+          <button
+            type="button"
             onClick={onExportRows}
             className="border border-neutral-900 bg-neutral-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
           >
@@ -51,6 +78,14 @@ export function StackTable({
           </button>
         </div>
       </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".csv,text/csv"
+        className="hidden"
+        onChange={handleFileChange}
+      />
 
       <div className="mt-4 border border-neutral-900 bg-neutral-100 p-3">
         <div className="flex items-start justify-between gap-4">

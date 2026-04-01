@@ -6,9 +6,11 @@ import { CurrentStackExpressionPanel } from "../components/CurrentStackExpressio
 import { FormulaPanel } from "../components/FormulaPanel";
 import { MonteCarloPanel } from "../components/MonteCarloPanel";
 import { StackTable } from "../components/StackTable";
-import { buildStackRowsCsv } from "../lib/csv";
+import { buildStackRowsCsv, parseStackRowsCsv } from "../lib/csv";
+import { downloadPdfReport } from "../lib/pdf-export";
 import { defaultSampleRows, samplePresets } from "../lib/sample-data";
 import { calculateStackup } from "../lib/stackup";
+import type { MonteCarloResult } from "../lib/monte-carlo";
 import type { StackRow } from "../lib/types";
 import { validateStackRows } from "../lib/validation";
 
@@ -16,6 +18,7 @@ const PRESET_LABELS = ["V-01", "V-02", "V-03"] as const;
 
 export default function Home() {
   const [rows, setRows] = useState<StackRow[]>(defaultSampleRows);
+  const [monteCarloResult, setMonteCarloResult] = useState<MonteCarloResult | null>(null);
   const validation = validateStackRows(rows);
   const result = validation.isValid ? calculateStackup(validation.parsedRows) : null;
   const zeroToleranceRows = validation.parsedRows.filter(
@@ -66,6 +69,25 @@ export default function Home() {
     URL.revokeObjectURL(url);
   }
 
+  async function importRowsCsv(file: File) {
+    try {
+      const csv = await file.text();
+      setRows(parseStackRowsCsv(csv));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to import CSV.";
+      window.alert(message);
+    }
+  }
+
+  function exportPdfReport() {
+    downloadPdfReport({
+      rows,
+      validation,
+      result,
+      monteCarloResult
+    });
+  }
+
   return (
     <main className="mx-auto flex min-h-screen w-full flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
       <section className="flex flex-col gap-3 border border-neutral-900 bg-white p-5 lg:p-6">
@@ -104,6 +126,7 @@ export default function Home() {
         <StackTable
           rows={rows}
           onAddRow={addRow}
+          onImportRows={importRowsCsv}
           onExportRows={exportRowsCsv}
           onDeleteRow={deleteRow}
           onChangeRow={updateRow}
@@ -112,7 +135,7 @@ export default function Home() {
           equationIsValid={validation.isValid}
         />
 
-        <MonteCarloPanel rows={validation.parsedRows} isValid={validation.isValid} />
+        <MonteCarloPanel rows={validation.parsedRows} isValid={validation.isValid} onResultChange={setMonteCarloResult} />
 
         <div className="flex h-full flex-col gap-6">
           <ResultsPanel
@@ -121,6 +144,7 @@ export default function Home() {
             errorCount={validation.errors.length}
             errors={validation.errors}
             zeroToleranceRows={zeroToleranceRows}
+            onExportPdf={exportPdfReport}
           />
         </div>
       </section>

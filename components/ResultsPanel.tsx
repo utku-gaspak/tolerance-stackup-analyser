@@ -7,9 +7,10 @@ interface ResultsPanelProps {
   errorCount: number;
   errors: RowValidationError[];
   zeroToleranceRows: number;
+  onExportPdf: () => void;
 }
 
-export function ResultsPanel({ result, isValid, errorCount, errors, zeroToleranceRows }: ResultsPanelProps) {
+export function ResultsPanel({ result, isValid, errorCount, errors, zeroToleranceRows, onExportPdf }: ResultsPanelProps) {
   return (
     <section className="flex h-full flex-col border border-neutral-900 bg-white p-4">
       <div className="flex items-start justify-between gap-4 border-b border-neutral-900 pb-3">
@@ -17,13 +18,22 @@ export function ResultsPanel({ result, isValid, errorCount, errors, zeroToleranc
           <h2 className="text-lg font-semibold tracking-tight text-neutral-950">Results</h2>
           <p className="mt-1 text-sm text-neutral-700">F-01 total nominal, F-02 worst-case, and F-03 RSS approximation.</p>
         </div>
-        <span
-          className={`border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
-            isValid ? "border-neutral-900 bg-neutral-100 text-neutral-900" : "border-neutral-900 bg-white text-neutral-900"
-          }`}
-        >
-          {isValid ? "Valid" : "Blocked"}
-        </span>
+        <div className="flex flex-col items-end gap-2">
+          <span
+            className={`border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
+              isValid ? "border-neutral-900 bg-neutral-100 text-neutral-900" : "border-neutral-900 bg-white text-neutral-900"
+            }`}
+          >
+            {isValid ? "Valid" : "Blocked"}
+          </span>
+          <button
+            type="button"
+            onClick={onExportPdf}
+            className="border border-neutral-900 bg-neutral-900 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-neutral-800"
+          >
+            Export PDF
+          </button>
+        </div>
       </div>
 
       {!isValid ? (

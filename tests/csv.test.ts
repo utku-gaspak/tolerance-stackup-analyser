@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildStackRowsCsv } from "../lib/csv";
+import { buildStackRowsCsv, parseStackRowsCsv } from "../lib/csv";
 import type { StackRow } from "../lib/types";
 
 describe("CSV export", () => {
@@ -30,5 +30,24 @@ describe("CSV export", () => {
         "2,Spacer,-,5.00,0.05,0.05"
       ].join("\n")
     );
+  });
+
+  it("round-trips exported csv back into rows", () => {
+    const rows: StackRow[] = [
+      {
+        id: "row-1",
+        label: "Bracket A",
+        nominal: "10.00",
+        plusTolerance: "0.10",
+        minusTolerance: "0.10",
+        direction: "+"
+      }
+    ];
+
+    expect(parseStackRowsCsv(buildStackRowsCsv(rows))).toEqual(rows);
+  });
+
+  it("rejects csv without the required headers", () => {
+    expect(() => parseStackRowsCsv("label,nominal\nA,10.00")).toThrow("Missing CSV column: id");
   });
 });

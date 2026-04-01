@@ -7,11 +7,12 @@ import type { ParsedStackRow } from "../lib/types";
 interface MonteCarloPanelProps {
   rows: ParsedStackRow[];
   isValid: boolean;
+  onResultChange?: (result: MonteCarloResult | null) => void;
 }
 
 const DEFAULT_SAMPLE_COUNT = 2000;
 
-export function MonteCarloPanel({ rows, isValid }: MonteCarloPanelProps) {
+export function MonteCarloPanel({ rows, isValid, onResultChange }: MonteCarloPanelProps) {
   const [sampleCount, setSampleCount] = useState(DEFAULT_SAMPLE_COUNT);
   const [seed, setSeed] = useState(1);
   const [result, setResult] = useState<MonteCarloResult | null>(() =>
@@ -28,6 +29,10 @@ export function MonteCarloPanel({ rows, isValid }: MonteCarloPanelProps) {
 
     setResult(null);
   }, [rowSignature]);
+
+  useEffect(() => {
+    onResultChange?.(result);
+  }, [result]);
 
   function runSimulation() {
     if (!isValid || rows.length === 0) {
