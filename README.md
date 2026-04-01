@@ -164,6 +164,41 @@ npm run start
 - RSS min/max: approximate statistical band using `F-03`
 - Monte Carlo: sampled distribution summary, not a deterministic guarantee
 
+## Monte Carlo
+
+The Monte Carlo panel estimates the distribution of the finished stack using repeated random samples.
+
+How to use it:
+
+1. Make sure the stack rows are valid.
+2. Set the number of samples.
+3. Optionally enter lower and upper spec limits.
+4. Run the simulation.
+
+What it shows:
+
+- Mean, min, max
+- P05 and P95 bounds
+- Histogram of sampled totals
+- Yield / pass rate when spec limits are set
+
+## Spec Limits
+
+Spec limits are optional acceptance limits for the simulated total stack value.
+
+Use them when you want a pass/fail estimate for the design:
+
+- Lower spec limit = minimum acceptable total
+- Upper spec limit = maximum acceptable total
+- If only one side matters, leave the other field blank
+- Yield is the fraction of Monte Carlo samples that stay inside the configured limits
+
+Example:
+
+- Lower spec limit: `34.80`
+- Upper spec limit: `35.20`
+- The Monte Carlo yield then tells you how often the stack falls inside that band
+
 ## Validation Rules
 
 - nominal must be numeric and non-empty

@@ -76,14 +76,23 @@ export function buildPdfReportData({ rows, validation, result, monteCarloResult,
           { label: "Min", value: formatNumber(monteCarloResult.min) },
           { label: "Max", value: formatNumber(monteCarloResult.max) },
           { label: "P05", value: formatNumber(monteCarloResult.p05) },
-          { label: "P95", value: formatNumber(monteCarloResult.p95) }
+          { label: "P95", value: formatNumber(monteCarloResult.p95) },
+          ...(monteCarloResult.passRate !== null
+            ? [
+                { label: "Yield", value: `${(monteCarloResult.passRate * 100).toFixed(1)}%` },
+                { label: "In spec", value: `${monteCarloResult.passCount}/${monteCarloResult.sampleCount}` }
+              ]
+            : [])
         ],
         histogram: monteCarloResult.histogram.map((bin) => ({
           range: `${formatNumber(bin.min)} to ${formatNumber(bin.max)}`,
           bar: createHistogramBar(bin.count, monteCarloResult.sampleCount),
           count: String(bin.count)
         })),
-        note: "Normal sampling with sigma approximated from row tolerance and clipped to bounds."
+        note:
+          monteCarloResult.passRate !== null
+            ? `Normal sampling with sigma approximated from row tolerance and clipped to bounds. Yield is evaluated against the configured spec limits.`
+            : "Normal sampling with sigma approximated from row tolerance and clipped to bounds."
       }
     : {
         available: false,

@@ -32,4 +32,19 @@ describe("Monte Carlo simulation", () => {
     expect(result.p95).toBeCloseTo(9, 6);
     expect(result.histogram).toEqual([{ min: 9, max: 9, count: 250 }]);
   });
+
+  it("reports 100 percent yield when all samples are in spec", () => {
+    const rows: ParsedStackRow[] = [
+      { id: "1", label: "A", nominal: 12, plusTolerance: 0, minusTolerance: 0, direction: "+" },
+      { id: "2", label: "B", nominal: 3, plusTolerance: 0, minusTolerance: 0, direction: "-" }
+    ];
+
+    const result = runMonteCarloSimulation(rows, 100, 7, { lower: 9, upper: 9 });
+
+    expect(result.passRate).toBe(1);
+    expect(result.passCount).toBe(100);
+    expect(result.failCount).toBe(0);
+    expect(result.lowerSpecLimit).toBe(9);
+    expect(result.upperSpecLimit).toBe(9);
+  });
 });

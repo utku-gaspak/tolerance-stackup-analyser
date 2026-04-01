@@ -1,5 +1,10 @@
 import type { ParsedStackRow, StackDirection } from "./types";
 
+export interface MonteCarloSpecLimits {
+  lower: number | null;
+  upper: number | null;
+}
+
 export interface MonteCarloHistogramBin {
   min: number;
   max: number;
@@ -13,6 +18,11 @@ export interface MonteCarloResult {
   max: number;
   p05: number;
   p95: number;
+  passCount: number | null;
+  failCount: number | null;
+  passRate: number | null;
+  lowerSpecLimit: number | null;
+  upperSpecLimit: number | null;
   histogram: MonteCarloHistogramBin[];
   seed: number;
 }
@@ -20,10 +30,16 @@ export interface MonteCarloResult {
 export function runMonteCarloSimulation(
   rows: ParsedStackRow[],
   sampleCount: number,
-  seed: number
+  seed: number,
+  specLimits: MonteCarloSpecLimits | null = null
 ): MonteCarloResult {
   const rng = mulberry32(seed);
   const totals: number[] = [];
+  const hasLowerSpec = specLimits?.lower !== null && specLimits?.lower !== undefined;
+  const hasUpperSpec = specLimits?.upper !== null && specLimits?.upper !== undefined;
+  const lowerSpecLimit = hasLowerSpec ? (specLimits?.lower ?? null) : null;
+  const upperSpecLimit = hasUpperSpec ? (specLimits?.upper ?? null) : null;
+  let passCount = 0;
 
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex += 1) {
     let total = 0;
@@ -34,6 +50,10 @@ export function runMonteCarloSimulation(
     }
 
     totals.push(total);
+
+    if (isInSpec(total, lowerSpecLimit, upperSpecLimit)) {
+      passCount += 1;
+    }
   }
 
   totals.sort((a, b) => a - b);
@@ -43,6 +63,10 @@ export function runMonteCarloSimulation(
   const max = totals[totals.length - 1] ?? 0;
   const p05 = quantile(totals, 0.05);
   const p95 = quantile(totals, 0.95);
+  const hasSpecLimits = lowerSpecLimit !== null || upperSpecLimit !== null;
+  const resolvedPassCount = hasSpecLimits ? passCount : null;
+  const resolvedFailCount = hasSpecLimits ? sampleCount - passCount : null;
+  const passRate = hasSpecLimits && sampleCount > 0 ? passCount / sampleCount : null;
   const histogram = buildHistogram(totals, 12);
 
   return {
@@ -52,6 +76,11 @@ export function runMonteCarloSimulation(
     max,
     p05,
     p95,
+    passCount: resolvedPassCount,
+    failCount: resolvedFailCount,
+    passRate,
+    lowerSpecLimit,
+    upperSpecLimit,
     histogram,
     seed
   };
@@ -130,6 +159,18 @@ function clamp(value: number, min: number, max: number): number {
 
 function signedValue(direction: StackDirection, value: number): number {
   return direction === "+" ? value : -value;
+}
+
+function isInSpec(total: number, lower: number | null, upper: number | null): boolean {
+  if (lower !== null && total < lower) {
+    return false;
+  }
+
+  if (upper !== null && total > upper) {
+    return false;
+  }
+
+  return lower !== null || upper !== null;
 }
 
 function mulberry32(seed: number): () => number {
