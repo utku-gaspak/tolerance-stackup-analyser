@@ -14,7 +14,7 @@
 - [x] Add yield / pass-rate estimation from Monte Carlo
 - [ ] Add tolerance sensitivity analysis for dominant contributors
 - [ ] Add stack comparison between two saved variants
-- [ ] Add spec limit checks with go / no-go status
+- [x] Add spec limit checks with go / no-go status
 - [ ] Add a tolerance what-if slider for quick scenario testing
 - [ ] Add warning highlights when one row dominates the stack
 - [ ] Add units switching with consistent conversion

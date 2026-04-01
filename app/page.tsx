@@ -10,7 +10,7 @@ import { buildStackRowsCsv, parseStackRowsCsv } from "../lib/csv";
 import { downloadPdfReport } from "../lib/pdf-export";
 import { defaultSampleRows, samplePresets } from "../lib/sample-data";
 import { calculateStackup } from "../lib/stackup";
-import type { MonteCarloResult } from "../lib/monte-carlo";
+import type { MonteCarloResult, MonteCarloSpecLimits } from "../lib/monte-carlo";
 import type { StackRow } from "../lib/types";
 import { validateStackRows } from "../lib/validation";
 
@@ -19,6 +19,7 @@ const PRESET_LABELS = ["V-01", "V-02", "V-03"] as const;
 export default function Home() {
   const [rows, setRows] = useState<StackRow[]>(defaultSampleRows);
   const [monteCarloResult, setMonteCarloResult] = useState<MonteCarloResult | null>(null);
+  const [specLimits, setSpecLimits] = useState<MonteCarloSpecLimits>({ lower: null, upper: null });
   const validation = validateStackRows(rows);
   const result = validation.isValid ? calculateStackup(validation.parsedRows) : null;
   const zeroToleranceRows = validation.parsedRows.filter(
@@ -135,12 +136,18 @@ export default function Home() {
           equationIsValid={validation.isValid}
         />
 
-        <MonteCarloPanel rows={validation.parsedRows} isValid={validation.isValid} onResultChange={setMonteCarloResult} />
+        <MonteCarloPanel
+          rows={validation.parsedRows}
+          isValid={validation.isValid}
+          onResultChange={setMonteCarloResult}
+          onSpecLimitsChange={setSpecLimits}
+        />
 
         <div className="flex h-full flex-col gap-6">
           <ResultsPanel
             result={result}
             rows={validation.parsedRows}
+            specLimits={specLimits}
             isValid={validation.isValid}
             errorCount={validation.errors.length}
             errors={validation.errors}

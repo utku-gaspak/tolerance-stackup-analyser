@@ -1,6 +1,7 @@
 import type { MonteCarloResult } from "./monte-carlo";
 import type { StackCalculationResult, StackRow } from "./types";
 import type { ValidationResult } from "./validation";
+import { evaluateSpecLimits } from "./spec-limits";
 
 export interface PdfReportInput {
   rows: StackRow[];
@@ -45,7 +46,18 @@ export function buildPdfReportData({ rows, validation, result, monteCarloResult,
         { label: "Worst-case max", value: formatNumber(result.worstCaseMax) },
         { label: "RSS tolerance", value: formatNumber(result.rssTolerance) },
         { label: "RSS min", value: formatNumber(result.rssMin) },
-        { label: "RSS max", value: formatNumber(result.rssMax) }
+        { label: "RSS max", value: formatNumber(result.rssMax) },
+        ...(monteCarloResult?.lowerSpecLimit !== null || monteCarloResult?.upperSpecLimit !== null
+          ? [
+              {
+                label: "Spec check",
+                value: evaluateSpecLimits(result, {
+                  lower: monteCarloResult?.lowerSpecLimit ?? null,
+                  upper: monteCarloResult?.upperSpecLimit ?? null
+                }).status.toUpperCase()
+              }
+            ]
+          : [])
       ]
     : [];
 

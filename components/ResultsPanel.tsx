@@ -1,6 +1,8 @@
 import type { RowValidationError } from "../lib/types";
 import type { ParsedStackRow, StackCalculationResult } from "../lib/types";
 import { calculateSensitivityAnalysis } from "../lib/sensitivity";
+import type { MonteCarloSpecLimits } from "../lib/monte-carlo";
+import { evaluateSpecLimits } from "../lib/spec-limits";
 
 interface ResultsPanelProps {
   result: StackCalculationResult | null;
@@ -9,11 +11,13 @@ interface ResultsPanelProps {
   errors: RowValidationError[];
   zeroToleranceRows: number;
   rows: ParsedStackRow[];
+  specLimits: MonteCarloSpecLimits;
   onExportPdf: () => void;
 }
 
-export function ResultsPanel({ result, rows, isValid, errorCount, errors, zeroToleranceRows, onExportPdf }: ResultsPanelProps) {
+export function ResultsPanel({ result, rows, specLimits, isValid, errorCount, errors, zeroToleranceRows, onExportPdf }: ResultsPanelProps) {
   const sensitivityItems = isValid ? calculateSensitivityAnalysis(rows).slice(0, 5) : [];
+  const specCheck = evaluateSpecLimits(result, specLimits);
 
   return (
     <section className="flex h-full flex-col border border-neutral-900 bg-white p-4">
@@ -80,6 +84,37 @@ export function ResultsPanel({ result, rows, isValid, errorCount, errors, zeroTo
             {zeroToleranceRows} row{zeroToleranceRows === 1 ? "" : "s"} use zero tolerance and remain valid.
           </div>
         ) : null}
+
+        <div className="border border-neutral-900 bg-white p-3">
+          <div className="flex items-center justify-between gap-4 border-b border-neutral-900 pb-2">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Spec Check</p>
+              <h3 className="mt-1 text-sm font-semibold tracking-tight text-neutral-950">Go / No-Go</h3>
+            </div>
+            <span
+              className={`border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
+                specCheck.status === "go"
+                  ? "border-neutral-900 bg-neutral-900 text-white"
+                  : specCheck.status === "no-go"
+                    ? "border-neutral-900 bg-neutral-100 text-neutral-900"
+                    : "border-neutral-900 bg-white text-neutral-700"
+              }`}
+            >
+              {specCheck.status === "go" ? "Go" : specCheck.status === "no-go" ? "No-Go" : specCheck.status === "blocked" ? "Blocked" : "Unset"}
+            </span>
+          </div>
+          <p className="mt-3 text-sm leading-6 text-neutral-700">{specCheck.message}</p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2 text-xs text-neutral-700">
+            <div className="border border-neutral-900 bg-neutral-100 p-2">
+              <p className="font-semibold uppercase tracking-[0.16em] text-neutral-600">Lower</p>
+              <p className="mt-1 font-mono tabular-nums">{specLimits.lower !== null ? formatNumber(specLimits.lower) : "Not set"}</p>
+            </div>
+            <div className="border border-neutral-900 bg-neutral-100 p-2">
+              <p className="font-semibold uppercase tracking-[0.16em] text-neutral-600">Upper</p>
+              <p className="mt-1 font-mono tabular-nums">{specLimits.upper !== null ? formatNumber(specLimits.upper) : "Not set"}</p>
+            </div>
+          </div>
+        </div>
 
         {sensitivityItems.length > 0 ? (
           <div className="border border-neutral-900 bg-white p-3">

@@ -1,18 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { runMonteCarloSimulation, type MonteCarloResult } from "../lib/monte-carlo";
+import { runMonteCarloSimulation, type MonteCarloResult, type MonteCarloSpecLimits } from "../lib/monte-carlo";
 import type { ParsedStackRow } from "../lib/types";
 
 interface MonteCarloPanelProps {
   rows: ParsedStackRow[];
   isValid: boolean;
   onResultChange?: (result: MonteCarloResult | null) => void;
+  onSpecLimitsChange?: (specLimits: MonteCarloSpecLimits) => void;
 }
 
 const DEFAULT_SAMPLE_COUNT = 2000;
 
-export function MonteCarloPanel({ rows, isValid, onResultChange }: MonteCarloPanelProps) {
+export function MonteCarloPanel({ rows, isValid, onResultChange, onSpecLimitsChange }: MonteCarloPanelProps) {
   const [sampleCount, setSampleCount] = useState(DEFAULT_SAMPLE_COUNT);
   const [seed, setSeed] = useState(1);
   const [lowerSpecLimit, setLowerSpecLimit] = useState("");
@@ -31,6 +32,9 @@ export function MonteCarloPanel({ rows, isValid, onResultChange }: MonteCarloPan
       ].join("::"),
     [rows, sampleCount, lowerSpecLimit, upperSpecLimit]
   );
+  const parsedLowerSpecLimit = parseOptionalLimit(lowerSpecLimit);
+  const parsedUpperSpecLimit = parseOptionalLimit(upperSpecLimit);
+  const specLimitsConfigured = parsedLowerSpecLimit !== null || parsedUpperSpecLimit !== null;
 
   useEffect(() => {
     if (!hasMounted.current) {
@@ -45,13 +49,22 @@ export function MonteCarloPanel({ rows, isValid, onResultChange }: MonteCarloPan
     onResultChange?.(result);
   }, [result]);
 
-  const parsedLowerSpecLimit = parseOptionalLimit(lowerSpecLimit);
-  const parsedUpperSpecLimit = parseOptionalLimit(upperSpecLimit);
-  const specLimitsConfigured = parsedLowerSpecLimit !== null || parsedUpperSpecLimit !== null;
+  useEffect(() => {
+    onSpecLimitsChange?.({ lower: parsedLowerSpecLimit, upper: parsedUpperSpecLimit });
+  }, [parsedLowerSpecLimit, parsedUpperSpecLimit, onSpecLimitsChange]);
 
   function runSimulation() {
     if (!isValid || rows.length === 0) {
       setResult(null);
+      return;
+    }
+
+    if (
+      parsedLowerSpecLimit !== null &&
+      parsedUpperSpecLimit !== null &&
+      parsedLowerSpecLimit > parsedUpperSpecLimit
+    ) {
+      window.alert("Lower spec limit must be less than or equal to upper spec limit.");
       return;
     }
 
