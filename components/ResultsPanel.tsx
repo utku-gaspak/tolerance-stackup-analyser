@@ -6,6 +6,7 @@ import { evaluateSpecLimits } from "../lib/spec-limits";
 
 interface ResultsPanelProps {
   result: StackCalculationResult | null;
+  baseResult: StackCalculationResult | null;
   isValid: boolean;
   errorCount: number;
   errors: RowValidationError[];
@@ -15,9 +16,21 @@ interface ResultsPanelProps {
   onExportPdf: () => void;
 }
 
-export function ResultsPanel({ result, rows, specLimits, isValid, errorCount, errors, zeroToleranceRows, onExportPdf }: ResultsPanelProps) {
+export function ResultsPanel({ result, baseResult, rows, specLimits, isValid, errorCount, errors, zeroToleranceRows, onExportPdf }: ResultsPanelProps) {
   const sensitivityItems = isValid ? calculateSensitivityAnalysis(rows).slice(0, 5) : [];
   const specCheck = evaluateSpecLimits(result, specLimits);
+  const comparisonCards = result && baseResult && (result.rssTolerance !== baseResult.rssTolerance || result.worstCaseMin !== baseResult.worstCaseMin || result.worstCaseMax !== baseResult.worstCaseMax)
+    ? [
+        {
+          label: "RSS delta",
+          value: formatDelta(result.rssTolerance - baseResult.rssTolerance)
+        },
+        {
+          label: "Worst-case span delta",
+          value: formatDelta((result.worstCaseMax - result.worstCaseMin) - (baseResult.worstCaseMax - baseResult.worstCaseMin))
+        }
+      ]
+    : [];
 
   return (
     <section className="flex h-full flex-col border border-neutral-900 bg-white p-4">
@@ -66,6 +79,26 @@ export function ResultsPanel({ result, rows, specLimits, isValid, errorCount, er
           <MetricCard label="RSS tolerance" value={formatNumber(result.rssTolerance)} accent="amber" />
           <MetricCard label="RSS min" value={formatNumber(result.rssMin)} accent="amber" />
           <MetricCard label="RSS max" value={formatNumber(result.rssMax)} accent="amber" />
+        </div>
+      ) : null}
+
+      {comparisonCards.length > 0 ? (
+        <div className="mt-4 border border-neutral-900 bg-neutral-100 p-3">
+          <div className="flex items-center justify-between gap-4 border-b border-neutral-900 pb-2">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">What-if result</p>
+              <h3 className="mt-1 text-sm font-semibold tracking-tight text-neutral-950">Scenario vs base</h3>
+            </div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Delta</p>
+          </div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            {comparisonCards.map((card) => (
+              <div key={card.label} className="border border-neutral-900 bg-white p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-600">{card.label}</p>
+                <p className="mt-2 font-mono text-sm font-semibold tabular-nums text-neutral-950">{card.value}</p>
+              </div>
+            ))}
+          </div>
         </div>
       ) : null}
 
@@ -182,4 +215,9 @@ function formatNumber(value: number): string {
 
 function formatPercent(value: number): string {
   return `${(value * 100).toFixed(1)}%`;
+}
+
+function formatDelta(value: number): string {
+  const sign = value > 0 ? "+" : "";
+  return `${sign}${value.toFixed(4)}`;
 }

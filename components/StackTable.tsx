@@ -11,6 +11,10 @@ interface StackTableProps {
   onAddRow: () => void;
   onImportRows: (file: File) => void;
   onExportRows: () => void;
+  whatIfGlobalPercent: number;
+  onWhatIfGlobalPercentChange: (value: number) => void;
+  whatIfRowPercents: Record<string, number>;
+  onWhatIfRowPercentChange: (id: string, value: number) => void;
   errorsByRow: Record<string, Partial<Record<RowValidationError["field"], string>>>;
   equationTotal: number | null;
   equationIsValid: boolean;
@@ -23,6 +27,10 @@ export function StackTable({
   onAddRow,
   onImportRows,
   onExportRows,
+  whatIfGlobalPercent,
+  onWhatIfGlobalPercentChange,
+  whatIfRowPercents,
+  onWhatIfRowPercentChange,
   errorsByRow,
   equationTotal,
   equationIsValid
@@ -113,6 +121,58 @@ export function StackTable({
           Contribution is the signed nominal term used in the equation. Tolerance propagation is shown separately in the
           results panel.
         </p>
+      </div>
+
+      <div className="mt-4 border border-neutral-900 bg-white p-3">
+        <div className="flex items-start justify-between gap-4 border-b border-neutral-900 pb-2">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-700">What-if preview</p>
+            <p className="mt-1 text-sm text-neutral-700">Scale tolerances globally or row-by-row without changing the base stack.</p>
+          </div>
+          <div className="border border-neutral-900 bg-neutral-100 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-800 tabular-nums">
+            {whatIfGlobalPercent}% global
+          </div>
+        </div>
+
+        <label className="mt-3 block">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-600">Global tolerance scale</span>
+          <input
+            type="range"
+            min={50}
+            max={200}
+            step={5}
+            value={whatIfGlobalPercent}
+            onChange={(event) => onWhatIfGlobalPercentChange(Number(event.target.value))}
+            className="mt-2 w-full accent-neutral-900"
+          />
+        </label>
+
+        <div className="mt-4 grid gap-2">
+          {rows.map((row) => {
+            const rowPercent = whatIfRowPercents[row.id] ?? 100;
+
+            return (
+              <div key={row.id} className="grid gap-2 rounded border border-neutral-900 bg-neutral-100 p-2 sm:grid-cols-[minmax(0,1fr)_10rem_4rem] sm:items-center">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-700">{row.label}</p>
+                  <p className="mt-1 text-[11px] leading-5 text-neutral-600">Row scale for local tolerance what-if.</p>
+                </div>
+                <input
+                  type="range"
+                  min={50}
+                  max={200}
+                  step={5}
+                  value={rowPercent}
+                  onChange={(event) => onWhatIfRowPercentChange(row.id, Number(event.target.value))}
+                  className="w-full accent-neutral-900"
+                />
+                <div className="justify-self-start border border-neutral-900 bg-white px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-800 tabular-nums">
+                  {rowPercent}%
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       <div className="mt-4 overflow-hidden border border-neutral-900">

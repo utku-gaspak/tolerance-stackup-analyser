@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ResultsPanel } from "../components/ResultsPanel";
 import { CurrentStackExpressionPanel } from "../components/CurrentStackExpressionPanel";
 import { FormulaPanel } from "../components/FormulaPanel";
@@ -13,6 +13,7 @@ import { calculateStackup } from "../lib/stackup";
 import type { MonteCarloResult, MonteCarloSpecLimits } from "../lib/monte-carlo";
 import type { StackRow } from "../lib/types";
 import { validateStackRows } from "../lib/validation";
+import { applyWhatIfScenario, clampWhatIfPercent, DEFAULT_WHAT_IF_PERCENT, type WhatIfPercents } from "../lib/what-if";
 
 const PRESET_LABELS = ["V-01", "V-02", "V-03"] as const;
 
@@ -20,8 +21,15 @@ export default function Home() {
   const [rows, setRows] = useState<StackRow[]>(defaultSampleRows);
   const [monteCarloResult, setMonteCarloResult] = useState<MonteCarloResult | null>(null);
   const [specLimits, setSpecLimits] = useState<MonteCarloSpecLimits>({ lower: null, upper: null });
+  const [whatIfGlobalPercent, setWhatIfGlobalPercent] = useState(DEFAULT_WHAT_IF_PERCENT);
+  const [whatIfRowPercents, setWhatIfRowPercents] = useState<WhatIfPercents>({});
   const validation = validateStackRows(rows);
-  const result = validation.isValid ? calculateStackup(validation.parsedRows) : null;
+  const scenarioRows = useMemo(
+    () => applyWhatIfScenario(validation.parsedRows, whatIfGlobalPercent, whatIfRowPercents),
+    [validation.parsedRows, whatIfGlobalPercent, whatIfRowPercents]
+  );
+  const baseResult = validation.isValid ? calculateStackup(validation.parsedRows) : null;
+  const result = validation.isValid ? calculateStackup(scenarioRows) : null;
   const zeroToleranceRows = validation.parsedRows.filter(
     (row) => row.plusTolerance === 0 && row.minusTolerance === 0
   ).length;
@@ -57,6 +65,10 @@ export default function Home() {
     setRows(samplePresets[preset].map((row) => ({ ...row })));
   }
 
+  function updateWhatIfRowPercent(id: string, percent: number) {
+    setWhatIfRowPercents((current) => ({ ...current, [id]: clampWhatIfPercent(percent) }));
+  }
+
   function exportRowsCsv() {
     const csv = buildStackRowsCsv(rows);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -74,6 +86,7 @@ export default function Home() {
     try {
       const csv = await file.text();
       setRows(parseStackRowsCsv(csv));
+      setWhatIfRowPercents({});
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to import CSV.";
       window.alert(message);
@@ -131,13 +144,17 @@ export default function Home() {
           onExportRows={exportRowsCsv}
           onDeleteRow={deleteRow}
           onChangeRow={updateRow}
+          whatIfGlobalPercent={whatIfGlobalPercent}
+          onWhatIfGlobalPercentChange={setWhatIfGlobalPercent}
+          whatIfRowPercents={whatIfRowPercents}
+          onWhatIfRowPercentChange={updateWhatIfRowPercent}
           errorsByRow={errorsByRow}
           equationTotal={result?.totalNominal ?? null}
           equationIsValid={validation.isValid}
         />
 
         <MonteCarloPanel
-          rows={validation.parsedRows}
+          rows={scenarioRows}
           isValid={validation.isValid}
           onResultChange={setMonteCarloResult}
           onSpecLimitsChange={setSpecLimits}
@@ -146,6 +163,7 @@ export default function Home() {
         <div className="flex h-full flex-col gap-6">
           <ResultsPanel
             result={result}
+            baseResult={baseResult}
             rows={validation.parsedRows}
             specLimits={specLimits}
             isValid={validation.isValid}
