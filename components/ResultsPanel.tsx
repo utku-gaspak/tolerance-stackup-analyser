@@ -1,5 +1,6 @@
 import type { RowValidationError } from "../lib/types";
-import type { StackCalculationResult } from "../lib/types";
+import type { ParsedStackRow, StackCalculationResult } from "../lib/types";
+import { calculateSensitivityAnalysis } from "../lib/sensitivity";
 
 interface ResultsPanelProps {
   result: StackCalculationResult | null;
@@ -7,10 +8,13 @@ interface ResultsPanelProps {
   errorCount: number;
   errors: RowValidationError[];
   zeroToleranceRows: number;
+  rows: ParsedStackRow[];
   onExportPdf: () => void;
 }
 
-export function ResultsPanel({ result, isValid, errorCount, errors, zeroToleranceRows, onExportPdf }: ResultsPanelProps) {
+export function ResultsPanel({ result, rows, isValid, errorCount, errors, zeroToleranceRows, onExportPdf }: ResultsPanelProps) {
+  const sensitivityItems = isValid ? calculateSensitivityAnalysis(rows).slice(0, 5) : [];
+
   return (
     <section className="flex h-full flex-col border border-neutral-900 bg-white p-4">
       <div className="flex items-start justify-between gap-4 border-b border-neutral-900 pb-3">
@@ -76,6 +80,39 @@ export function ResultsPanel({ result, isValid, errorCount, errors, zeroToleranc
             {zeroToleranceRows} row{zeroToleranceRows === 1 ? "" : "s"} use zero tolerance and remain valid.
           </div>
         ) : null}
+
+        {sensitivityItems.length > 0 ? (
+          <div className="border border-neutral-900 bg-white p-3">
+            <div className="flex items-center justify-between gap-4 border-b border-neutral-900 pb-2">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Sensitivity</p>
+                <h3 className="mt-1 text-sm font-semibold tracking-tight text-neutral-950">Dominant contributors</h3>
+              </div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">RSS share</p>
+            </div>
+            <div className="mt-3 grid gap-2">
+              {sensitivityItems.map((item, index) => (
+                <div key={item.id} className="grid grid-cols-[1.25rem_minmax(0,1fr)_5rem_4rem] items-center gap-2 text-xs">
+                  <span className="font-semibold text-neutral-700">{index + 1}</span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-neutral-950">{item.label}</span>
+                      <span className="border border-neutral-900 bg-neutral-100 px-1.5 py-0.5 font-mono text-[10px] text-neutral-700">{item.direction}</span>
+                    </div>
+                    <div className="mt-1 h-2 border border-neutral-900 bg-white">
+                      <div className="h-full bg-neutral-900" style={{ width: `${Math.max(4, item.rssShare * 100)}%` }} />
+                    </div>
+                  </div>
+                  <span className="font-mono tabular-nums text-right text-neutral-700">{formatPercent(item.rssShare)}</span>
+                  <span className="font-mono tabular-nums text-right text-neutral-700">{formatNumber(item.effectiveTolerance)}</span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-xs leading-5 text-neutral-600">
+              Ranked by RSS contribution share. Rows with the largest share are the best candidates for tightening.
+            </p>
+          </div>
+        ) : null}
       </div>
     </section>
   );
@@ -106,4 +143,8 @@ function MetricCard({
 
 function formatNumber(value: number): string {
   return value.toFixed(4);
+}
+
+function formatPercent(value: number): string {
+  return `${(value * 100).toFixed(1)}%`;
 }

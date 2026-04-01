@@ -140,6 +140,7 @@ export default function Home() {
         <div className="flex h-full flex-col gap-6">
           <ResultsPanel
             result={result}
+            rows={validation.parsedRows}
             isValid={validation.isValid}
             errorCount={validation.errors.length}
             errors={validation.errors}
