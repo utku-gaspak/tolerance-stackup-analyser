@@ -6,6 +6,7 @@ interface StackTableProps {
   onChangeRow: (id: string, field: keyof StackRow, value: string) => void;
   onDeleteRow: (id: string) => void;
   onAddRow: () => void;
+  onExportRows: () => void;
   errorsByRow: Record<string, Partial<Record<RowValidationError["field"], string>>>;
   equationTotal: number | null;
   equationIsValid: boolean;
@@ -16,6 +17,7 @@ export function StackTable({
   onChangeRow,
   onDeleteRow,
   onAddRow,
+  onExportRows,
   errorsByRow,
   equationTotal,
   equationIsValid
@@ -32,13 +34,22 @@ export function StackTable({
           <h2 className="text-lg font-semibold tracking-tight text-neutral-950">Stack definition</h2>
           <p className="mt-1 text-sm text-neutral-700">Edit rows inline. Calculation output will update from this state.</p>
         </div>
-        <button
-          type="button"
-          onClick={onAddRow}
-          className="border border-neutral-900 px-3 py-2 text-sm font-medium text-neutral-900 transition hover:bg-neutral-100"
-        >
-          Add row
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onAddRow}
+            className="border border-neutral-900 bg-white px-3 py-2 text-sm font-medium text-neutral-900 transition hover:bg-neutral-100"
+          >
+            Add row
+          </button>
+          <button
+            type="button"
+            onClick={onExportRows}
+            className="border border-neutral-900 bg-neutral-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
+          >
+            Export CSV
+          </button>
+        </div>
       </div>
 
       <div className="mt-4 border border-neutral-900 bg-neutral-100 p-3">

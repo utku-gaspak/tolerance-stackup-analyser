@@ -6,6 +6,7 @@ import { CurrentStackExpressionPanel } from "../components/CurrentStackExpressio
 import { FormulaPanel } from "../components/FormulaPanel";
 import { MonteCarloPanel } from "../components/MonteCarloPanel";
 import { StackTable } from "../components/StackTable";
+import { buildStackRowsCsv } from "../lib/csv";
 import { defaultSampleRows, samplePresets } from "../lib/sample-data";
 import { calculateStackup } from "../lib/stackup";
 import type { StackRow } from "../lib/types";
@@ -52,8 +53,21 @@ export default function Home() {
     setRows(samplePresets[preset].map((row) => ({ ...row })));
   }
 
+  function exportRowsCsv() {
+    const csv = buildStackRowsCsv(rows);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "tolerance-stackup-rows.csv";
+    link.click();
+
+    URL.revokeObjectURL(url);
+  }
+
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-8xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
+    <main className="mx-auto flex min-h-screen w-full flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
       <section className="flex flex-col gap-3 border border-neutral-900 bg-white p-5 lg:p-6">
         <div className="flex flex-col gap-2">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-700">Engineering calculator</p>
@@ -83,20 +97,14 @@ export default function Home() {
               Load {preset}
             </button>
           ))}
-          <button
-            type="button"
-            onClick={addRow}
-            className="border border-neutral-900 bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
-          >
-            Add row
-          </button>
         </div>
       </section>
 
-      <section className="grid items-stretch gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,0.95fr)_minmax(0,0.95fr)]">
+      <section className="grid items-stretch gap-5 2xl:grid-cols-[minmax(0,1.7fr)_minmax(0,0.95fr)_minmax(0,0.95fr)]">
         <StackTable
           rows={rows}
           onAddRow={addRow}
+          onExportRows={exportRowsCsv}
           onDeleteRow={deleteRow}
           onChangeRow={updateRow}
           errorsByRow={errorsByRow}
@@ -117,7 +125,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
+      <section className="grid gap-5 2xl:grid-cols-[1.4fr_1fr]">
         <FormulaPanel rows={rows} compact />
 
         <div className="grid gap-4 content-start">

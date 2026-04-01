@@ -41,7 +41,6 @@ Not included in MVP:
 - multi-user features
 - CAD integration
 - advanced GD&T
-- Monte Carlo simulation
 
 ## Formulas
 

@@ -16,4 +16,20 @@ describe("Monte Carlo simulation", () => {
     expect(result.max).toBeGreaterThanOrEqual(result.mean);
     expect(result.histogram.length).toBeGreaterThan(0);
   });
+
+  it("keeps zero-tolerance rows fixed in the sampled distribution", () => {
+    const rows: ParsedStackRow[] = [
+      { id: "1", label: "A", nominal: 12, plusTolerance: 0, minusTolerance: 0, direction: "+" },
+      { id: "2", label: "B", nominal: 3, plusTolerance: 0, minusTolerance: 0, direction: "-" }
+    ];
+
+    const result = runMonteCarloSimulation(rows, 250, 7);
+
+    expect(result.min).toBeCloseTo(9, 6);
+    expect(result.max).toBeCloseTo(9, 6);
+    expect(result.mean).toBeCloseTo(9, 6);
+    expect(result.p05).toBeCloseTo(9, 6);
+    expect(result.p95).toBeCloseTo(9, 6);
+    expect(result.histogram).toEqual([{ min: 9, max: 9, count: 250 }]);
+  });
 });
