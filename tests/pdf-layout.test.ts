@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { CONTENT_TOP_Y, PAGE_BOTTOM_MARGIN, ensureSpace, estimateSectionBlockHeight, estimateTableBlockHeight } from "../lib/pdf-layout";
+import {
+  CONTENT_TOP_Y,
+  HISTOGRAM_ROW_HEIGHT,
+  PAGE_BOTTOM_MARGIN,
+  ensureSpace,
+  estimateHistogramBlockHeight,
+  estimateSectionBlockHeight,
+  estimateTableBlockHeight
+} from "../lib/pdf-layout";
 
 describe("PDF layout helpers", () => {
   it("reserves the top header band for body content", () => {
@@ -19,5 +27,12 @@ describe("PDF layout helpers", () => {
   it("estimates section blocks larger than plain tables", () => {
     expect(estimateSectionBlockHeight(1)).toBeGreaterThan(estimateTableBlockHeight(1));
     expect(PAGE_BOTTOM_MARGIN).toBeGreaterThan(0);
+  });
+
+  it("estimates histogram blocks with heading overhead", () => {
+    expect(estimateHistogramBlockHeight(1, HISTOGRAM_ROW_HEIGHT)).toBeGreaterThan(HISTOGRAM_ROW_HEIGHT);
+    expect(estimateHistogramBlockHeight(3, HISTOGRAM_ROW_HEIGHT)).toBeGreaterThan(
+      estimateHistogramBlockHeight(1, HISTOGRAM_ROW_HEIGHT)
+    );
   });
 });

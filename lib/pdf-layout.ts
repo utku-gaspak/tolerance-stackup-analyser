@@ -14,6 +14,7 @@ export const SECTION_TITLE_HEIGHT = 5;
 export const DEFAULT_TABLE_ROW_HEIGHT = 7;
 export const DEFAULT_TABLE_HEADER_HEIGHT = 8;
 export const HISTOGRAM_ROW_HEIGHT = 6;
+export const HISTOGRAM_HEADER_HEIGHT = 10;
 
 export function startNewPage(doc: jsPDF): number {
   doc.addPage();
@@ -46,4 +47,8 @@ export function estimateSectionBlockHeight(
 
 export function estimateTextBlockHeight(lineCount: number, lineHeight: number = 5): number {
   return TITLE_SPACING + SECTION_TITLE_HEIGHT + lineCount * lineHeight;
+}
+
+export function estimateHistogramBlockHeight(rowCount: number, rowHeight: number = HISTOGRAM_ROW_HEIGHT): number {
+  return TITLE_SPACING + SECTION_TITLE_HEIGHT + HISTOGRAM_HEADER_HEIGHT + rowCount * rowHeight;
 }

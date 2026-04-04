@@ -12,6 +12,9 @@ import {
   SECTION_SPACING,
   TITLE_SPACING,
   ensureSpace,
+  HISTOGRAM_HEADER_HEIGHT,
+  HISTOGRAM_ROW_HEIGHT,
+  estimateHistogramBlockHeight,
   estimateSectionBlockHeight,
   estimateTableBlockHeight,
   estimateTextBlockHeight,
@@ -31,138 +34,167 @@ export function downloadPdfReport(input: PdfReportInput): void {
   doc.setTextColor(0, 0, 0);
   doc.setDrawColor(0, 0, 0);
 
-  cursorY = placeSection(doc, cursorY, estimateSectionBlockHeight(1, DEFAULT_TABLE_ROW_HEIGHT), pageHeight);
-  cursorY = drawSectionHeading(doc, "Executive Summary", cursorY, left, pageWidth - right);
-  autoTable(doc, {
-    startY: cursorY,
+  cursorY = renderTableSection(doc, {
+    title: "Executive Summary",
+    cursorY,
+    left,
+    right: pageWidth - right,
+    pageHeight,
     margin: tableMargin,
-    theme: "grid",
-    head: [["Metric", "Value"]],
     body:
       report.summaryMetrics.length > 0
         ? report.summaryMetrics.map((metric) => [metric.label, metric.value])
         : [["Status", "No deterministic results available"]],
-    styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2 },
-    headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
-    columnStyles: { 0: { cellWidth: 55, fontStyle: "bold" }, 1: { halign: "right" } }
+    head: [["Metric", "Value"]],
+    requiredHeight: estimateSectionBlockHeight(1, DEFAULT_TABLE_ROW_HEIGHT),
+    options: {
+      styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2 },
+      headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
+      columnStyles: { 0: { cellWidth: 55, fontStyle: "bold" }, 1: { halign: "right" } }
+    }
   });
-
-  cursorY = lastTableY(doc) ?? cursorY;
-  cursorY = placeSection(doc, cursorY + SECTION_SPACING, estimateSectionBlockHeight(1, DEFAULT_TABLE_ROW_HEIGHT), pageHeight);
-  cursorY = drawSectionHeading(doc, "Validation Summary", cursorY, left, pageWidth - right);
-  autoTable(doc, {
-    startY: cursorY,
+  cursorY = renderTableSection(doc, {
+    title: "Validation Summary",
+    cursorY,
+    left,
+    right: pageWidth - right,
+    pageHeight,
     margin: tableMargin,
-    theme: "grid",
-    head: [["Field", "Value"]],
     body: report.validationSummary.map((item) => [item.label, item.value]),
-    styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2 },
-    headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
-    columnStyles: { 0: { cellWidth: 55, fontStyle: "bold" }, 1: { halign: "right" } }
-  });
-
-  cursorY = lastTableY(doc) ?? cursorY;
-  if (report.validationErrors.length > 0) {
-    cursorY = placeSection(doc, cursorY + SECTION_SPACING, estimateSectionBlockHeight(1, 8.5), pageHeight);
-    cursorY = drawSectionHeading(doc, "Validation Errors", cursorY, left, pageWidth - right);
-    autoTable(doc, {
-      startY: cursorY,
-      margin: tableMargin,
-      theme: "grid",
-      head: [["Row", "Field", "Message"]],
-      body: report.validationErrors.map((error) => [error.row, error.field, error.message]),
-      styles: { font: "helvetica", fontSize: 8.5, cellPadding: 2, textColor: 20, lineColor: 0, lineWidth: 0.2 },
-      headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" }
-    });
-    cursorY = lastTableY(doc) ?? cursorY;
-  }
-
-  cursorY = placeSection(doc, cursorY + SECTION_SPACING, estimateSectionBlockHeight(1, 8.5), pageHeight);
-  cursorY = drawSectionHeading(doc, "Stack Definition", cursorY, left, pageWidth - right);
-  autoTable(doc, {
-    startY: cursorY,
-    margin: tableMargin,
-    theme: "grid",
-    head: [["#", "Label", "Dir", "Nominal", "+Tol", "-Tol", "Contribution"]],
-    body: report.rows.map((row) => [row.index, row.label, row.direction, row.nominal, row.plusTolerance, row.minusTolerance, row.contribution]),
-    styles: { font: "helvetica", fontSize: 8.5, cellPadding: 1.9, textColor: 20, lineColor: 0, lineWidth: 0.2 },
-    headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
-    columnStyles: {
-      0: { cellWidth: 10, halign: "center" },
-      2: { cellWidth: 12, halign: "center" },
-      3: { halign: "right" },
-      4: { halign: "right" },
-      5: { halign: "right" },
-      6: { halign: "right" }
+    head: [["Field", "Value"]],
+    requiredHeight: estimateSectionBlockHeight(1, DEFAULT_TABLE_ROW_HEIGHT),
+    options: {
+      styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2 },
+      headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
+      columnStyles: { 0: { cellWidth: 55, fontStyle: "bold" }, 1: { halign: "right" } }
     }
   });
 
-  cursorY = lastTableY(doc) ?? cursorY;
-  cursorY = placeSection(doc, cursorY + TITLE_SPACING, estimateTextBlockHeight(1), pageHeight);
-  cursorY = drawSectionHeading(doc, "Equation Summary", cursorY, left, pageWidth - right);
-  autoTable(doc, {
-    startY: cursorY,
-    margin: tableMargin,
-    theme: "grid",
-    head: [["Equation"]],
-    body: [[report.equationExpression || "No equation available"]],
-    styles: { font: "courier", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2, valign: "top" },
-    headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold", font: "helvetica" },
-    columnStyles: { 0: { cellWidth: pageWidth - left - right } }
-  });
+  if (report.validationErrors.length > 0) {
+    cursorY = renderTableSection(doc, {
+      title: "Validation Errors",
+      cursorY,
+      left,
+      right: pageWidth - right,
+      pageHeight,
+      margin: tableMargin,
+      body: report.validationErrors.map((error) => [error.row, error.field, error.message]),
+      head: [["Row", "Field", "Message"]],
+      requiredHeight: estimateSectionBlockHeight(1, 8.5),
+      options: {
+        styles: { font: "helvetica", fontSize: 8.5, cellPadding: 2, textColor: 20, lineColor: 0, lineWidth: 0.2 },
+        headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" }
+      }
+    });
+  }
 
-  cursorY = lastTableY(doc) ?? cursorY;
-  cursorY = placeSection(doc, cursorY + TITLE_SPACING, estimateSectionBlockHeight(1, DEFAULT_TABLE_ROW_HEIGHT), pageHeight);
-  cursorY = drawSectionHeading(doc, "Deterministic Results", cursorY, left, pageWidth - right);
-  autoTable(doc, {
-    startY: cursorY,
+  cursorY = renderTableSection(doc, {
+    title: "Stack Definition",
+    cursorY,
+    left,
+    right: pageWidth - right,
+    pageHeight,
     margin: tableMargin,
-    theme: "grid",
-    head: [["Metric", "Value"]],
+    body: report.rows.map((row) => [row.index, row.label, row.direction, row.nominal, row.plusTolerance, row.minusTolerance, row.contribution]),
+    head: [["#", "Label", "Dir", "Nominal", "+Tol", "-Tol", "Contribution"]],
+    requiredHeight: estimateSectionBlockHeight(1, 8.5),
+    options: {
+      styles: { font: "helvetica", fontSize: 8.5, cellPadding: 1.9, textColor: 20, lineColor: 0, lineWidth: 0.2 },
+      headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
+      columnStyles: {
+        0: { cellWidth: 10, halign: "center" },
+        2: { cellWidth: 12, halign: "center" },
+        3: { halign: "right" },
+        4: { halign: "right" },
+        5: { halign: "right" },
+        6: { halign: "right" }
+      }
+    }
+  });
+  cursorY = renderTableSection(doc, {
+    title: "Equation Summary",
+    cursorY,
+    left,
+    right: pageWidth - right,
+    pageHeight,
+    margin: tableMargin,
+    body: [[report.equationExpression || "No equation available"]],
+    head: [["Equation"]],
+    requiredHeight: estimateTextBlockHeight(1),
+    spacing: TITLE_SPACING,
+    options: {
+      styles: { font: "courier", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2, valign: "top" },
+      headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold", font: "helvetica" },
+      columnStyles: { 0: { cellWidth: pageWidth - left - right } }
+    }
+  });
+  cursorY = renderTableSection(doc, {
+    title: "Deterministic Results",
+    cursorY,
+    left,
+    right: pageWidth - right,
+    pageHeight,
+    margin: tableMargin,
     body:
       report.summaryMetrics.length > 0
         ? report.summaryMetrics.map((metric) => [metric.label, metric.value])
         : [["Status", "No deterministic results available"]],
-    styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2 },
-    headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
-    columnStyles: { 0: { cellWidth: 55, fontStyle: "bold" }, 1: { halign: "right" } }
-  });
-
-  cursorY = lastTableY(doc) ?? cursorY;
-  cursorY = placeSection(doc, cursorY + SECTION_SPACING, estimateSectionBlockHeight(1, DEFAULT_TABLE_ROW_HEIGHT), pageHeight);
-  cursorY = drawSectionHeading(doc, "Monte Carlo Summary", cursorY, left, pageWidth - right);
-  autoTable(doc, {
-    startY: cursorY,
-    margin: tableMargin,
-    theme: "grid",
     head: [["Metric", "Value"]],
+    requiredHeight: estimateSectionBlockHeight(1, DEFAULT_TABLE_ROW_HEIGHT),
+    spacing: TITLE_SPACING,
+    options: {
+      styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2 },
+      headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
+      columnStyles: { 0: { cellWidth: 55, fontStyle: "bold" }, 1: { halign: "right" } }
+    }
+  });
+  cursorY = renderTableSection(doc, {
+    title: "Monte Carlo Summary",
+    cursorY,
+    left,
+    right: pageWidth - right,
+    pageHeight,
+    margin: tableMargin,
     body:
       report.monteCarlo.summary.length > 0
         ? report.monteCarlo.summary.map((metric) => [metric.label, metric.value])
         : [["Status", report.monteCarlo.note]],
-    styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2 },
-    headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
-    columnStyles: { 0: { cellWidth: 40, fontStyle: "bold" }, 1: { halign: "right" } }
+    head: [["Metric", "Value"]],
+    requiredHeight: estimateSectionBlockHeight(1, DEFAULT_TABLE_ROW_HEIGHT),
+    options: {
+      styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2 },
+      headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
+      columnStyles: { 0: { cellWidth: 40, fontStyle: "bold" }, 1: { halign: "right" } }
+    }
   });
 
   if (report.monteCarlo.histogram.length > 0) {
-    cursorY = lastTableY(doc) ?? cursorY;
-    cursorY = placeSection(doc, cursorY + SECTION_SPACING, estimateSectionBlockHeight(report.monteCarlo.histogram.length, DEFAULT_TABLE_ROW_HEIGHT), pageHeight);
-    cursorY = drawSectionHeading(doc, "Histogram", cursorY, left, pageWidth - right);
-    cursorY = drawHistogram(doc, report.monteCarlo.histogram, report.monteCarlo.sampleCount, cursorY, left, pageWidth - right, pageHeight);
+    cursorY = renderHistogramSection(
+      doc,
+      report.monteCarlo.histogram,
+      report.monteCarlo.sampleCount,
+      cursorY,
+      left,
+      pageWidth - right,
+      pageHeight
+    );
   }
 
-  cursorY = placeSection(doc, cursorY + SECTION_SPACING, estimateTableBlockHeight(report.notes.length, 5), pageHeight);
-  cursorY = drawSectionHeading(doc, "Assumptions and Notes", cursorY, left, pageWidth - right);
-  autoTable(doc, {
-    startY: cursorY,
+  renderTableSection(doc, {
+    title: "Assumptions and Notes",
+    cursorY,
+    left,
+    right: pageWidth - right,
+    pageHeight,
     margin: tableMargin,
-    theme: "grid",
-    head: [["Note"]],
     body: report.notes.map((note) => [note]),
-    styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2, valign: "top" },
-    headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
-    columnStyles: { 0: { cellWidth: pageWidth - left - right } }
+    head: [["Note"]],
+    requiredHeight: estimateTableBlockHeight(report.notes.length, 5),
+    options: {
+      styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2, valign: "top" },
+      headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
+      columnStyles: { 0: { cellWidth: pageWidth - left - right } }
+    }
   });
 
   addHeadersAndFooters(doc, report.generatedAtLabel, report.rowCount, pageWidth, pageHeight);
@@ -190,6 +222,81 @@ function placeSection(doc: jsPDF, y: number, requiredHeight: number, pageHeight:
   return y;
 }
 
+function prepareSectionStart(
+  doc: jsPDF,
+  cursorY: number,
+  spacing: number,
+  requiredHeight: number,
+  pageHeight: number
+): number {
+  const startY = placeSection(doc, cursorY + spacing, requiredHeight, pageHeight);
+  return startY;
+}
+
+function renderTableSection(
+  doc: jsPDF,
+  {
+    title,
+    cursorY,
+    left,
+    right,
+    pageHeight,
+    margin,
+    head,
+    body,
+    requiredHeight,
+    spacing = SECTION_SPACING,
+    options
+  }: {
+    title: string;
+    cursorY: number;
+    left: number;
+    right: number;
+    pageHeight: number;
+    margin: { left: number; right: number; top: number; bottom: number };
+    head: string[][];
+    body: Array<Array<string | number>>;
+    requiredHeight: number;
+    spacing?: number;
+    options: Parameters<typeof autoTable>[1];
+  }
+): number {
+  const startY = prepareSectionStart(doc, cursorY, spacing, requiredHeight, pageHeight);
+  const tableY = drawSectionHeading(doc, title, startY, left, right);
+
+  autoTable(doc, {
+    ...options,
+    startY: tableY,
+    margin,
+    theme: "grid",
+    head,
+    body
+  });
+
+  return lastTableY(doc) ?? tableY;
+}
+
+function renderHistogramSection(
+  doc: jsPDF,
+  bins: Array<{ range: string; bar: string; count: string }>,
+  sampleCount: number,
+  cursorY: number,
+  left: number,
+  rightEdge: number,
+  pageHeight: number
+): number {
+  let y = prepareSectionStart(
+    doc,
+    cursorY,
+    SECTION_SPACING,
+    estimateHistogramBlockHeight(1, HISTOGRAM_ROW_HEIGHT),
+    pageHeight
+  );
+  y = drawSectionHeading(doc, "Histogram", y, left, rightEdge);
+
+  return drawHistogram(doc, bins, sampleCount, y, left, rightEdge, pageHeight);
+}
+
 function drawHistogram(
   doc: jsPDF,
   bins: Array<{ range: string; bar: string; count: string }>,
@@ -199,7 +306,7 @@ function drawHistogram(
   rightEdge: number,
   pageHeight: number
 ): number {
-  const rowHeight = 6;
+  const rowHeight = HISTOGRAM_ROW_HEIGHT;
   const labelWidth = 34;
   const countWidth = 14;
   const barGap = 3;
@@ -210,8 +317,12 @@ function drawHistogram(
   doc.setFontSize(8);
 
   bins.forEach((bin) => {
-    if (ensureSpace(y, rowHeight, pageHeight) === CONTENT_TOP_Y && y !== CONTENT_TOP_Y) {
+    if (
+      ensureSpace(y, HISTOGRAM_HEADER_HEIGHT + rowHeight, pageHeight) === CONTENT_TOP_Y &&
+      y !== CONTENT_TOP_Y
+    ) {
       y = startNewPage(doc);
+      y = drawSectionHeading(doc, "Histogram", y, left, rightEdge);
     }
 
     const count = Number(bin.count);
