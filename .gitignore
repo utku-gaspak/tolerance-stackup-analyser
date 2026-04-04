@@ -5,3 +5,7 @@ dist/
 coverage/
 .DS_Store
 tsconfig.tsbuildinfo
+
+# Only keep README markdown files
+*.md
+!README.md
