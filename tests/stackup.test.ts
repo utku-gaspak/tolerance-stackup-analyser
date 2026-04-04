@@ -61,6 +61,50 @@ describe("stackup calculations", () => {
     expect(result.worstCaseMax).toBeCloseTo(12.1, 6);
     expect(result.rssTolerance).toBeCloseTo(0.1, 6);
   });
+
+  it("handles mixed directions with asymmetric tolerances", () => {
+    const rows = [
+      row("1", "+", "100.00", "0.30", "0.10"),
+      row("2", "-", "40.00", "0.20", "0.40"),
+      row("3", "-", "10.00", "0.05", "0.15")
+    ];
+
+    const result = calculateStackup(validateStackRows(rows).parsedRows);
+
+    expect(result.totalNominal).toBeCloseTo(50, 6);
+    expect(result.worstCaseMin).toBeCloseTo(49.65, 6);
+    expect(result.worstCaseMax).toBeCloseTo(50.85, 6);
+    expect(result.rssTolerance).toBeCloseTo(0.3741657387, 6);
+    expect(result.rssMin).toBeCloseTo(49.6258342613, 6);
+    expect(result.rssMax).toBeCloseTo(50.3741657387, 6);
+  });
+
+  it("handles a single subtractive contributor", () => {
+    const rows = [row("1", "-", "10.00", "0.20", "0.10")];
+
+    const result = calculateStackup(validateStackRows(rows).parsedRows);
+
+    expect(result.totalNominal).toBeCloseTo(-10, 6);
+    expect(result.worstCaseMin).toBeCloseTo(-10.2, 6);
+    expect(result.worstCaseMax).toBeCloseTo(-9.9, 6);
+    expect(result.rssTolerance).toBeCloseTo(0.15, 6);
+    expect(result.rssMin).toBeCloseTo(-10.15, 6);
+    expect(result.rssMax).toBeCloseTo(-9.85, 6);
+  });
+
+  it("keeps precision across large and tiny tolerance contributors", () => {
+    const rows = [
+      row("1", "+", "1000.00", "5.00", "5.00"),
+      row("2", "+", "1.00", "0.0001", "0.0001")
+    ];
+
+    const result = calculateStackup(validateStackRows(rows).parsedRows);
+
+    expect(result.totalNominal).toBeCloseTo(1001, 6);
+    expect(result.worstCaseMin).toBeCloseTo(995.9999, 6);
+    expect(result.worstCaseMax).toBeCloseTo(1006.0001, 6);
+    expect(result.rssTolerance).toBeCloseTo(5.000000001, 6);
+  });
 });
 
 describe("validation", () => {

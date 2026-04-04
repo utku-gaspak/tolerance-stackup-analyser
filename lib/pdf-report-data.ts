@@ -150,7 +150,13 @@ function formatNumber(value: number): string {
 }
 
 function formatContribution(nominal: string, direction: StackRow["direction"]): string {
-  const parsed = Number(nominal.trim());
+  const trimmed = nominal.trim();
+
+  if (!trimmed) {
+    return "—";
+  }
+
+  const parsed = Number(trimmed);
   const numeric = Number.isFinite(parsed) ? parsed.toFixed(2) : "—";
 
   if (direction === "+") {

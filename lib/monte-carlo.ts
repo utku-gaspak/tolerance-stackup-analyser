@@ -33,6 +33,10 @@ export function runMonteCarloSimulation(
   seed: number,
   specLimits: MonteCarloSpecLimits | null = null
 ): MonteCarloResult {
+  if (!Number.isInteger(sampleCount) || sampleCount <= 0) {
+    throw new Error("Sample count must be a positive integer.");
+  }
+
   const rng = mulberry32(seed);
   const totals: number[] = [];
   const hasLowerSpec = specLimits?.lower !== null && specLimits?.lower !== undefined;
