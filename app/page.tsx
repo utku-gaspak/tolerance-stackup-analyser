@@ -1,33 +1,32 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { ResultsPanel } from "../components/ResultsPanel";
 import { CurrentStackExpressionPanel } from "../components/CurrentStackExpressionPanel";
 import { FormulaPanel } from "../components/FormulaPanel";
 import { MonteCarloPanel } from "../components/MonteCarloPanel";
 import { StackTable } from "../components/StackTable";
-import { buildStackRowsCsv, parseStackRowsCsv } from "../lib/csv";
-import { downloadPdfReport } from "../lib/pdf-export";
-import { defaultSampleRows, samplePresets } from "../lib/sample-data";
+import { useCsvImportExport } from "../hooks/useCsvImportExport";
+import { useMonteCarloState } from "../hooks/useMonteCarloState";
+import { usePdfExport } from "../hooks/usePdfExport";
+import { useStackupRows } from "../hooks/useStackupRows";
+import { useWhatIfScenario } from "../hooks/useWhatIfScenario";
 import { calculateStackup } from "../lib/stackup";
-import type { MonteCarloResult, MonteCarloSpecLimits } from "../lib/monte-carlo";
-import type { StackRow } from "../lib/types";
 import { validateStackRows } from "../lib/validation";
-import { applyWhatIfScenario, clampWhatIfPercent, DEFAULT_WHAT_IF_PERCENT, type WhatIfPercents } from "../lib/what-if";
 
 const PRESET_LABELS = ["V-01", "V-02", "V-03"] as const;
 
 export default function Home() {
-  const [rows, setRows] = useState<StackRow[]>(defaultSampleRows);
-  const [monteCarloResult, setMonteCarloResult] = useState<MonteCarloResult | null>(null);
-  const [specLimits, setSpecLimits] = useState<MonteCarloSpecLimits>({ lower: null, upper: null });
-  const [whatIfGlobalPercent, setWhatIfGlobalPercent] = useState(DEFAULT_WHAT_IF_PERCENT);
-  const [whatIfRowPercents, setWhatIfRowPercents] = useState<WhatIfPercents>({});
+  const { monteCarloResult, setMonteCarloResult, specLimits, setSpecLimits } = useMonteCarloState();
+  const { rows, updateRow, addRow, deleteRow, replaceRows, loadPreset: loadPresetRows } = useStackupRows();
   const validation = validateStackRows(rows);
-  const scenarioRows = useMemo(
-    () => applyWhatIfScenario(validation.parsedRows, whatIfGlobalPercent, whatIfRowPercents),
-    [validation.parsedRows, whatIfGlobalPercent, whatIfRowPercents]
-  );
+  const {
+    scenarioRows,
+    whatIfGlobalPercent,
+    setWhatIfGlobalPercent,
+    whatIfRowPercents,
+    updateWhatIfRowPercent,
+    resetWhatIfScenario
+  } = useWhatIfScenario(validation.parsedRows);
   const baseResult = validation.isValid ? calculateStackup(validation.parsedRows) : null;
   const result = validation.isValid ? calculateStackup(scenarioRows) : null;
   const zeroToleranceRows = validation.parsedRows.filter(
@@ -38,68 +37,28 @@ export default function Home() {
     accumulator[error.id][error.field] = error.message;
     return accumulator;
   }, {});
+  const { exportRowsCsv, importRowsCsv } = useCsvImportExport({
+    rows,
+    onRowsImported: replaceRows
+  });
+  const { exportPdfReport } = usePdfExport({
+    rows,
+    validation,
+    result,
+    monteCarloResult
+  });
 
-  function updateRow(id: string, field: keyof StackRow, value: string) {
-    setRows((current) => current.map((row) => (row.id === id ? { ...row, [field]: value } : row)));
+  function loadPreset(preset: (typeof PRESET_LABELS)[number]) {
+    loadPresetRows(preset);
+    resetWhatIfScenario();
   }
 
-  function addRow() {
-    setRows((current) => [
-      ...current,
-      {
-        id: `row-${Date.now()}`,
-        label: "New element",
-        nominal: "0.00",
-        plusTolerance: "0.00",
-        minusTolerance: "0.00",
-        direction: "+"
-      }
-    ]);
-  }
+  async function importRows(file: File) {
+    const didImport = await importRowsCsv(file);
 
-  function deleteRow(id: string) {
-    setRows((current) => current.filter((row) => row.id !== id));
-  }
-
-  function loadPreset(preset: keyof typeof samplePresets) {
-    setRows(samplePresets[preset].map((row) => ({ ...row })));
-  }
-
-  function updateWhatIfRowPercent(id: string, percent: number) {
-    setWhatIfRowPercents((current) => ({ ...current, [id]: clampWhatIfPercent(percent) }));
-  }
-
-  function exportRowsCsv() {
-    const csv = buildStackRowsCsv(rows);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = "tolerance-stackup-rows.csv";
-    link.click();
-
-    URL.revokeObjectURL(url);
-  }
-
-  async function importRowsCsv(file: File) {
-    try {
-      const csv = await file.text();
-      setRows(parseStackRowsCsv(csv));
-      setWhatIfRowPercents({});
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to import CSV.";
-      window.alert(message);
+    if (didImport) {
+      resetWhatIfScenario();
     }
-  }
-
-  function exportPdfReport() {
-    downloadPdfReport({
-      rows,
-      validation,
-      result,
-      monteCarloResult
-    });
   }
 
   return (
@@ -140,7 +99,7 @@ export default function Home() {
         <StackTable
           rows={rows}
           onAddRow={addRow}
-          onImportRows={importRowsCsv}
+          onImportRows={importRows}
           onExportRows={exportRowsCsv}
           onDeleteRow={deleteRow}
           onChangeRow={updateRow}
