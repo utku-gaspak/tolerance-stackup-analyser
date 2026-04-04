@@ -5,6 +5,7 @@ import { ResultsPanel } from "../components/ResultsPanel";
 import { CurrentStackExpressionPanel } from "../components/CurrentStackExpressionPanel";
 import { FormulaPanel } from "../components/FormulaPanel";
 import { MonteCarloPanel } from "../components/MonteCarloPanel";
+import { QuickStartPanel } from "../components/QuickStartPanel";
 import { StackTable } from "../components/StackTable";
 import { useCsvImportExport } from "../hooks/useCsvImportExport";
 import { useMonteCarloState } from "../hooks/useMonteCarloState";
@@ -22,6 +23,7 @@ const PRESET_LABELS = ["V-01", "V-02", "V-03"] as const;
 
 export default function Home() {
   const [engineeringUnit, setEngineeringUnit] = useState<EngineeringUnit>("mm");
+  const [isQuickStartOpen, setIsQuickStartOpen] = useState(false);
   const { monteCarloResult, setMonteCarloResult, specLimits, setSpecLimits } = useMonteCarloState();
   const {
     savedVariants,
@@ -136,7 +138,27 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="grid items-stretch gap-5 2xl:grid-cols-[minmax(0,1.7fr)_minmax(0,0.95fr)_minmax(0,0.95fr)]">
+      <section className="border border-neutral-900 bg-white p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-700">Workspace toolbar</p>
+            <p className="text-[10.5px] leading-[1.1rem] text-neutral-700">
+              Toggle the Quick Start panel without changing the main three-panel workspace below.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsQuickStartOpen((current) => !current)}
+            className="border border-neutral-900 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-900 transition hover:bg-neutral-50"
+          >
+            {isQuickStartOpen ? "Hide Quick Start" : "Show Quick Start"}
+          </button>
+        </div>
+      </section>
+
+      {isQuickStartOpen ? <QuickStartPanel /> : null}
+
+      <section className="grid items-start gap-5 2xl:grid-cols-[minmax(0,2fr)_minmax(0,0.95fr)_minmax(0,0.95fr)]">
         <StackTable
           rows={rows}
           presetLabels={PRESET_LABELS}
@@ -164,28 +186,26 @@ export default function Home() {
           onSpecLimitsChange={setSpecLimits}
         />
 
-        <div className="flex h-full flex-col gap-6">
-          <ResultsPanel
-            result={result}
-            baseResult={baseResult}
-            rows={validation.parsedRows}
-            specLimits={specLimits}
-            isValid={validation.isValid}
-            errorCount={validation.errors.length}
-            errors={validation.errors}
-            zeroToleranceRows={zeroToleranceRows}
-            onExportPdf={exportPdfReport}
-            onExportJson={exportJsonReport}
-            savedVariants={savedVariants}
-            leftVariantId={leftVariantId}
-            rightVariantId={rightVariantId}
-            onLeftVariantChange={setLeftVariantId}
-            onRightVariantChange={setRightVariantId}
-            onSaveVariant={handleSaveVariant}
-            variantComparison={variantComparison}
-            engineeringUnit={engineeringUnit}
-          />
-        </div>
+        <ResultsPanel
+          result={result}
+          baseResult={baseResult}
+          rows={validation.parsedRows}
+          specLimits={specLimits}
+          isValid={validation.isValid}
+          errorCount={validation.errors.length}
+          errors={validation.errors}
+          zeroToleranceRows={zeroToleranceRows}
+          onExportPdf={exportPdfReport}
+          onExportJson={exportJsonReport}
+          savedVariants={savedVariants}
+          leftVariantId={leftVariantId}
+          rightVariantId={rightVariantId}
+          onLeftVariantChange={setLeftVariantId}
+          onRightVariantChange={setRightVariantId}
+          onSaveVariant={handleSaveVariant}
+          variantComparison={variantComparison}
+          engineeringUnit={engineeringUnit}
+        />
       </section>
 
       <section className="grid gap-5 2xl:grid-cols-[1.4fr_1fr]">
@@ -193,17 +213,6 @@ export default function Home() {
 
         <div className="grid gap-4 content-start">
           <CurrentStackExpressionPanel rows={rows} />
-          <aside className="border border-neutral-900 bg-neutral-100 p-3.5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-700">Status</p>
-            <h2 className="mt-1 text-sm font-semibold tracking-tight text-neutral-950">Core scaffold is live</h2>
-            <p className="mt-2 text-[10.5px] leading-[1.1rem] text-neutral-700">
-              Validation, results, formula reference, and Monte Carlo are connected.
-            </p>
-            <div className="mt-2.5 border border-neutral-900 bg-white px-3 py-2">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-600">Current rows</p>
-              <p className="mt-1 text-2xl font-semibold text-neutral-950 tabular-nums">{rows.length}</p>
-            </div>
-          </aside>
         </div>
       </section>
 
