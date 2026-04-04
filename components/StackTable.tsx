@@ -63,7 +63,7 @@ export function StackTable({
   }
 
   return (
-    <section className="border border-neutral-900 bg-white p-4">
+    <section className="flex h-full flex-col border border-neutral-900 bg-white p-4">
       <div className="flex items-center justify-between gap-4 border-b border-neutral-900 pb-3">
         <div>
           <h2 className="text-lg font-semibold tracking-tight text-neutral-950">Stack definition</h2>

@@ -103,7 +103,7 @@ export default function Home() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
+    <main className="mx-auto flex min-h-screen w-full flex-col gap-5 px-4 py-6 sm:px-6 lg:px-8">
       <section className="flex flex-col gap-3 border border-neutral-900 bg-white p-5 lg:p-6">
         <div className="flex flex-col gap-2">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-700">Engineering calculator</p>
@@ -158,7 +158,7 @@ export default function Home() {
 
       {isQuickStartOpen ? <QuickStartPanel /> : null}
 
-      <section className="grid items-start gap-5 2xl:grid-cols-[minmax(0,2fr)_minmax(0,0.95fr)_minmax(0,0.95fr)]">
+      <section className="grid items-stretch gap-5 2xl:grid-cols-[minmax(0,2fr)_minmax(0,0.95fr)_minmax(0,0.95fr)]">
         <StackTable
           rows={rows}
           presetLabels={PRESET_LABELS}
@@ -211,7 +211,7 @@ export default function Home() {
       <section className="grid gap-5 2xl:grid-cols-[1.4fr_1fr]">
         <FormulaPanel rows={rows} compact />
 
-        <div className="grid gap-4 content-start">
+        <div className="grid gap-5 content-start">
           <CurrentStackExpressionPanel rows={rows} />
         </div>
       </section>

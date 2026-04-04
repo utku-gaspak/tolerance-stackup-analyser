@@ -115,7 +115,7 @@ export function MonteCarloPanel({
   }
 
   return (
-    <section className="border border-neutral-900 bg-white p-4">
+    <section className="flex h-full flex-col border border-neutral-900 bg-white p-4">
       <div className="flex items-start justify-between gap-4 border-b border-neutral-900 pb-3">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Monte Carlo</p>
