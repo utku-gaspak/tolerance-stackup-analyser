@@ -6,74 +6,76 @@ Live app: https://tolstackup.com
 
 The UI is intentionally industrial and worksheet-like: black/white/gray, compact tables, explicit borders, and panel-based engineering output.
 
-## What It Does
+## Overview
 
-- Defines a linear tolerance chain
-- Calculates total nominal using `F-01`
-- Calculates worst-case min/max using `F-02`
-- Calculates an RSS band using `F-03`
-- Shows a live stack equation and current signed nominal expression
-- Provides a formula reference panel for `F-01` to `F-03`
-- Runs an optional Monte Carlo estimate with histogram output
-- Validates invalid numeric input and tolerance rules
-- Loads sample presets aligned with `V-01`, `V-02`, and `V-03`
+This app models a linear stack of dimensions and evaluates it with deterministic and statistical methods.
+
+It currently supports:
+
+- editable stack rows with label, nominal, plus tolerance, minus tolerance, and direction
+- live total nominal, worst-case, and RSS results
+- live stack equation and signed nominal expression
+- what-if tolerance scaling globally and per row
+- Monte Carlo simulation with histogram output
+- optional lower and upper spec limits with yield estimate
+- sensitivity ranking for dominant RSS contributors
+- CSV import and CSV export for stack rows
+- PDF export and JSON export for the current report state
+- saved variant snapshots with side-by-side comparison
+- engineering unit switching between `mm` and `in`
+- validation messaging for invalid and zero-tolerance rows
+- sample presets covering the main reference scenarios
 
 ## Scope
 
-This project is intentionally small and practical.
+This project is intentionally practical and narrow in scope.
 
-Included in MVP:
+Included:
 
-- editable stack rows
-- label, nominal, plus tolerance, minus tolerance, direction
-- live stack equation summary
-- live results
-- formula reference
-- Monte Carlo distribution panel
-- validation feedback
-- sample presets
-- industrial engineering-style UI
+- 1D linear chain stackups
+- deterministic stack calculations
+- statistical approximation views
+- exportable engineering review output
+- lightweight scenario exploration
 
-Not included in MVP:
+Not included:
 
 - auth
 - database
-- multi-user features
+- multi-user collaboration
 - CAD integration
 - advanced GD&T
 
 ## Formulas
 
-The calculation core is implemented in `lib/stackup.ts`.
+The deterministic calculation core is implemented in `lib/stackup.ts`.
 
-- `F-01` Total nominal stack: `Σ(direction_i * n_i)`
+- `F-01` Total nominal stack: `Σ(direction_i × n_i)`
 - `F-02` Worst-case stack bounds: deterministic min/max propagation
-- `F-03` RSS approximation: `sqrt(Σ(effective_tol_i^2))`
-- `F-04` Monte Carlo simulation: random sampled assemblies using a normal distribution clipped to row tolerances
+- `F-03` RSS approximation: `sqrt(Σ(((t_plus_i + t_minus_i)/2)^2))`
+- `F-04` Monte Carlo simulation: bounded random sampling around each row nominal
 
-Important note:
+Important notes:
 
-- RSS is an approximation, not a guarantee
 - worst-case is conservative and deterministic
-- formulas are implemented as pure utilities in `lib/stackup.ts`
-- Monte Carlo is implemented separately in `lib/monte-carlo.ts`
+- RSS uses average row tolerance and assumes independent contributors
+- Monte Carlo uses a normal sample with sigma approximated from average row tolerance, then clips each sample to row bounds
+- RSS and Monte Carlo are approximations, not guarantees
 
 ## Assumptions
 
-The modeling assumptions are documented in this README.
-
 - `A-01` 1D linear chain only
-- `A-02` RSS contributors are independent
+- `A-02` RSS contributors are treated as independent
 - `A-03` asymmetric tolerances are allowed
-- `A-04` units must stay consistent
-- `A-05` no advanced GD&T in MVP
-- `A-06` negative tolerances are invalid input
-- `A-07` deterministic core comes first
-- `A-08` approximation labels must be honest
+- `A-04` zero tolerance rows are valid and stay fixed at nominal
+- `A-05` negative tolerances are invalid input
+- `A-06` unit conversions must stay internally consistent
+- `A-07` deterministic results come first; statistical views are secondary
+- `A-08` statistical wording in UI and exports should stay explicit
 
 ## Validation Cases
 
-Manual validation cases are covered by the test suite in `tests/`.
+Validation coverage lives in `tests/`.
 
 - `V-01` all positive contributors
 - `V-02` mixed positive and negative directions
@@ -81,7 +83,7 @@ Manual validation cases are covered by the test suite in `tests/`.
 - `V-04` zero tolerance row
 - `V-05` invalid input handling
 
-Current implementation is validated against `V-01`, `V-02`, and `V-03` in the calculation core, and the UI handles `V-04` and `V-05` validation states.
+Current implementation covers deterministic logic, Monte Carlo edge cases, PDF/JSON report shaping, and variant comparison behavior with automated tests.
 
 ## Tech Stack
 
@@ -89,28 +91,33 @@ Current implementation is validated against `V-01`, `V-02`, and `V-03` in the ca
 - React 19
 - TypeScript
 - Tailwind CSS
+- Vitest
+- jsPDF
 
 ## Project Structure
 
-- `app/` - app router entry points and global styles
-- `components/` - UI components
-- `lib/` - types, formulas, sample data, validation
-- `tests/` - core calculation and simulation tests
+- `app/` - app router entry points and page composition
+- `components/` - UI panels and editors
+- `hooks/` - page-level state orchestration
+- `lib/` - calculation, conversion, validation, export, and report helpers
+- `tests/` - deterministic, Monte Carlo, export, and comparison tests
 
 ## Key Files
 
-- `lib/types.ts` - domain types
-- `lib/stackup.ts` - pure calculation utilities
+- `app/page.tsx` - main app composition and state wiring
+- `components/StackTable.tsx` - stack definition table, CSV actions, and what-if controls
+- `components/ResultsPanel.tsx` - deterministic results, sensitivity view, spec check, exports, and saved variant comparison
+- `components/MonteCarloPanel.tsx` - Monte Carlo controls and distribution output
+- `hooks/useReportExport.ts` - JSON/PDF report export wiring
+- `hooks/useSavedVariants.ts` - saved snapshot state and comparison selection
+- `hooks/useWhatIfScenario.ts` - global and per-row what-if scaling
+- `lib/stackup.ts` - pure deterministic calculation utilities
 - `lib/monte-carlo.ts` - Monte Carlo simulation utilities
-- `lib/validation.ts` - input validation helpers
-- `lib/sample-data.ts` - preset stacks for validation and demo
-- `components/StackTable.tsx` - table shell
-- `components/StackRowEditor.tsx` - row editor
-- `components/ResultsPanel.tsx` - deterministic results panel
-- `components/FormulaPanel.tsx` - formula reference panel
-- `components/CurrentStackExpressionPanel.tsx` - live signed expression panel
-- `components/MonteCarloPanel.tsx` - simulation panel
-- `tests/` - core calculation and simulation tests
+- `lib/sensitivity.ts` - RSS contribution analysis
+- `lib/units.ts` - `mm` / `in` conversion helpers
+- `lib/pdf-report-data.ts` - shared report payload builder for PDF and JSON
+- `lib/pdf-export.ts` - PDF rendering
+- `lib/json-export.ts` - JSON report export
 
 ## Getting Started
 
@@ -145,71 +152,82 @@ npm run start
 - `npm run dev` - start the local dev server
 - `npm run build` - create a production build
 - `npm run start` - run the production server
-- `npm test` - run core calculation and simulation tests
+- `npm run lint` - run ESLint
+- `npm run typecheck` - run TypeScript without emitting files
+- `npm run check` - run lint, type-check, and tests together
+- `npm test` - run the Vitest suite
 - `npm run test:watch` - run tests in watch mode
 
 ## How To Use
 
-1. Load a sample preset or edit the default rows.
-2. Change nominal values, tolerances, and direction.
-3. Watch the results update live.
-4. Review the live stack equation and current signed expression.
-5. Run Monte Carlo when you want a distribution estimate.
-6. Fix any highlighted validation errors.
+1. Choose `mm` or `in` from the unit toggle.
+2. Load a preset or edit the current rows directly in the stack table.
+3. Adjust nominal values, tolerances, and direction.
+4. Use the what-if controls if you want to scale tolerances globally or by row without changing the base stack.
+5. Review total nominal, worst-case, RSS, sensitivity, and spec-check output in the results panel.
+6. Run Monte Carlo when you want a distribution estimate and optional yield against spec limits.
+7. Save snapshots if you want to compare two valid variants side by side.
+8. Export the current report as PDF or JSON when you need to share the analysis state.
 
 ## Result Interpretation
 
-- Total nominal: baseline stack value
-- Worst-case min/max: deterministic bounds using `F-02`
-- RSS min/max: approximate statistical band using `F-03`
-- Monte Carlo: sampled distribution summary, not a deterministic guarantee
+- Total nominal: baseline signed stack value
+- Worst-case min/max: deterministic bounds from row limits
+- RSS min/max: approximate statistical band from average row tolerances
+- Sensitivity: rows ranked by RSS contribution share
+- Spec check: deterministic go / no-go against configured limits using worst-case bounds
+- Monte Carlo: sampled distribution summary and optional yield estimate
 
-## Monte Carlo
+## Exports
 
-The Monte Carlo panel estimates the distribution of the finished stack using repeated random samples.
+The app supports:
 
-How to use it:
+- CSV export for stack rows
+- CSV import for stack rows
+- PDF report export for engineering review
+- JSON report export using the same report payload model as the PDF
 
-1. Make sure the stack rows are valid.
-2. Set the number of samples.
-3. Optionally enter lower and upper spec limits.
-4. Run the simulation.
+PDF and JSON exports include:
+
+- validation summary
+- stack definition
+- deterministic results
+- Monte Carlo summary and histogram when available
+- assumptions and notes
+- active engineering unit
+
+## Monte Carlo And Spec Limits
+
+The Monte Carlo panel estimates the distribution of the finished stack using repeated bounded random samples.
 
 What it shows:
 
-- Mean, min, max
+- mean, min, max
 - P05 and P95 bounds
-- Histogram of sampled totals
-- Yield / pass rate when spec limits are set
-
-## Spec Limits
+- histogram of sampled totals
+- yield and in-spec count when lower and/or upper spec limits are set
 
 Spec limits are optional acceptance limits for the simulated total stack value.
 
-Use them when you want a pass/fail estimate for the design:
+- lower spec limit = minimum acceptable total
+- upper spec limit = maximum acceptable total
+- either side may be left blank
+- yield is the fraction of Monte Carlo samples inside the configured band
 
-- Lower spec limit = minimum acceptable total
-- Upper spec limit = maximum acceptable total
-- If only one side matters, leave the other field blank
-- Yield is the fraction of Monte Carlo samples that stay inside the configured limits
-
-Example:
-
-- Lower spec limit: `34.80`
-- Upper spec limit: `35.20`
-- The Monte Carlo yield then tells you how often the stack falls inside that band
+Monte Carlo output should be treated as an estimate, not a deterministic release criterion.
 
 ## Validation Rules
 
+- label is required
 - nominal must be numeric and non-empty
-- plus tolerance must be numeric and not negative
-- minus tolerance must be numeric and not negative
+- plus tolerance must be numeric and non-negative
+- minus tolerance must be numeric and non-negative
 - direction must be `+` or `-`
 - zero tolerance is allowed
 
 ## Sample Output Targets
 
-These are the expected results for the documented validation cases:
+These are the expected deterministic targets for the documented reference cases:
 
 - `V-01`: total nominal `35.00`, worst-case `34.65` to `35.35`
 - `V-02`: total nominal `35.00`, worst-case `34.65` to `35.35`
@@ -219,30 +237,26 @@ These are the expected results for the documented validation cases:
 
 Implemented:
 
-- scaffolded Next.js app
-- core calculation utilities
-- input validation
-- sample presets
+- deterministic stack calculations
 - editable stack UI
-- deterministic results panel
-- formula reference panel
-- current stack expression panel
-- Monte Carlo simulation panel
 - validation messaging
-- automated tests for `V-01` to `V-05`
-- simulation test coverage
+- sample presets
+- what-if tolerance scaling
+- Monte Carlo simulation with optional spec limits
+- sensitivity analysis
+- CSV import/export
+- PDF and JSON report export
+- saved variant comparison
+- engineering unit switching
+- automated tests for deterministic logic, Monte Carlo, exports, and comparison flows
 
-Next possible additions:
+Open product work:
 
-- tighter mobile polish
-- responsive layout refinement for smaller laptop screens
-- yield / pass-rate on top of Monte Carlo
-- additional sample cases
-- export/report output
+- dominance warnings based on sensitivity share
 
 ## Notes
 
 - `tolerance-stackup-builder-agent/` is ignored in this repo
-- formulas live in `lib/stackup.ts`
-- assumptions are summarized in this README
-- validation cases live in `tests/`
+- formulas live primarily in `lib/stackup.ts`
+- shared report shaping lives in `lib/pdf-report-data.ts`
+- validation and behavior coverage live in `tests/`

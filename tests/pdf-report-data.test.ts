@@ -17,9 +17,11 @@ describe("PDF report data", () => {
       validation,
       result,
       monteCarloResult,
+      engineeringUnit: "mm",
       generatedAt: new Date("2026-04-01T15:30:00Z")
     });
 
+    expect(report.engineeringUnit).toBe("mm");
     expect(report.rowCount).toBe(3);
     expect(report.validationStatus).toBe("Valid");
     expect(report.summaryMetrics[0]).toEqual({ label: "Total nominal", value: "35.0000" });
@@ -62,6 +64,7 @@ describe("PDF report data", () => {
       validation,
       result: null,
       monteCarloResult: null,
+      engineeringUnit: "mm",
       generatedAt: new Date("2026-04-01T15:30:00Z")
     });
 
@@ -101,9 +104,13 @@ describe("PDF report data", () => {
       validation,
       result,
       monteCarloResult,
+      engineeringUnit: "in",
       generatedAt: new Date("2026-04-01T15:30:00Z")
     });
 
+    expect(report.validationSummary).toEqual(
+      expect.arrayContaining([expect.objectContaining({ label: "Unit", value: "in" })])
+    );
     expect(report.summaryMetrics).toEqual(
       expect.arrayContaining([expect.objectContaining({ label: "Spec check", value: "NO-GO" })])
     );
@@ -115,5 +122,6 @@ describe("PDF report data", () => {
     );
     expect(report.monteCarlo.note).toContain("configured spec limits");
     expect(report.monteCarlo.note).toContain("estimate, not a guarantee");
+    expect(report.notes).toContain("Report values are expressed in in.");
   });
 });

@@ -1,5 +1,6 @@
 import type { RowValidationError } from "../lib/types";
-import type { ParsedStackRow, SavedStackVariant, StackCalculationResult } from "../lib/types";
+import { formatEngineeringValue } from "../lib/units";
+import type { EngineeringUnit, ParsedStackRow, SavedStackVariant, StackCalculationResult } from "../lib/types";
 import { calculateSensitivityAnalysis } from "../lib/sensitivity";
 import type { VariantComparisonSummary } from "../lib/variant-comparison";
 import type { MonteCarloSpecLimits } from "../lib/monte-carlo";
@@ -23,6 +24,7 @@ interface ResultsPanelProps {
   onRightVariantChange: (id: string) => void;
   onSaveVariant: () => void;
   variantComparison: VariantComparisonSummary | null;
+  engineeringUnit: EngineeringUnit;
 }
 
 export function ResultsPanel({
@@ -42,7 +44,8 @@ export function ResultsPanel({
   onLeftVariantChange,
   onRightVariantChange,
   onSaveVariant,
-  variantComparison
+  variantComparison,
+  engineeringUnit
 }: ResultsPanelProps) {
   const sensitivityItems = isValid ? calculateSensitivityAnalysis(rows).slice(0, 5) : [];
   const specCheck = evaluateSpecLimits(result, specLimits);
@@ -117,12 +120,12 @@ export function ResultsPanel({
 
       {result ? (
         <div className="mt-6 grid auto-rows-min items-start content-start gap-4 sm:grid-cols-2">
-          <MetricCard label="Total nominal" value={formatNumber(result.totalNominal)} accent="slate" />
-          <MetricCard label="Worst-case min" value={formatNumber(result.worstCaseMin)} accent="blue" />
-          <MetricCard label="Worst-case max" value={formatNumber(result.worstCaseMax)} accent="blue" />
-          <MetricCard label="RSS tolerance" value={formatNumber(result.rssTolerance)} accent="amber" />
-          <MetricCard label="RSS min" value={formatNumber(result.rssMin)} accent="amber" />
-          <MetricCard label="RSS max" value={formatNumber(result.rssMax)} accent="amber" />
+          <MetricCard label="Total nominal" value={formatNumber(result.totalNominal)} unit={engineeringUnit} accent="slate" />
+          <MetricCard label="Worst-case min" value={formatNumber(result.worstCaseMin)} unit={engineeringUnit} accent="blue" />
+          <MetricCard label="Worst-case max" value={formatNumber(result.worstCaseMax)} unit={engineeringUnit} accent="blue" />
+          <MetricCard label="RSS tolerance" value={formatNumber(result.rssTolerance)} unit={engineeringUnit} accent="amber" />
+          <MetricCard label="RSS min" value={formatNumber(result.rssMin)} unit={engineeringUnit} accent="amber" />
+          <MetricCard label="RSS max" value={formatNumber(result.rssMax)} unit={engineeringUnit} accent="amber" />
         </div>
       ) : null}
 
@@ -194,7 +197,7 @@ export function ResultsPanel({
               <span>Metric</span>
               <span>{variantComparison.leftName}</span>
               <span>{variantComparison.rightName}</span>
-              <span className="text-right">Delta</span>
+              <span className="text-right">Delta ({variantComparison.unit})</span>
             </div>
             <div className="mt-2 grid gap-2">
               {variantComparison.metrics.map((metric) => (
@@ -252,11 +255,11 @@ export function ResultsPanel({
           <p className="mt-3 text-sm leading-6 text-neutral-700">{specCheck.message}</p>
           <div className="mt-3 grid gap-2 sm:grid-cols-2 text-xs text-neutral-700">
             <div className="border border-neutral-900 bg-neutral-100 p-2">
-              <p className="font-semibold uppercase tracking-[0.16em] text-neutral-600">Lower</p>
+              <p className="font-semibold uppercase tracking-[0.16em] text-neutral-600">Lower ({engineeringUnit})</p>
               <p className="mt-1 font-mono tabular-nums">{specLimits.lower !== null ? formatNumber(specLimits.lower) : "Not set"}</p>
             </div>
             <div className="border border-neutral-900 bg-neutral-100 p-2">
-              <p className="font-semibold uppercase tracking-[0.16em] text-neutral-600">Upper</p>
+              <p className="font-semibold uppercase tracking-[0.16em] text-neutral-600">Upper ({engineeringUnit})</p>
               <p className="mt-1 font-mono tabular-nums">{specLimits.upper !== null ? formatNumber(specLimits.upper) : "Not set"}</p>
             </div>
           </div>
@@ -269,7 +272,7 @@ export function ResultsPanel({
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Sensitivity</p>
                 <h3 className="mt-1 text-sm font-semibold tracking-tight text-neutral-950">Dominant contributors</h3>
               </div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">RSS share</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">RSS share / {engineeringUnit}</p>
             </div>
             <div className="mt-3 grid gap-2">
               {sensitivityItems.map((item, index) => (
@@ -302,10 +305,12 @@ export function ResultsPanel({
 function MetricCard({
   label,
   value,
+  unit,
   accent
 }: {
   label: string;
   value: string;
+  unit: EngineeringUnit;
   accent: "slate" | "blue" | "amber";
 }) {
   const accentClasses = {
@@ -316,14 +321,14 @@ function MetricCard({
 
   return (
     <div className={`border p-3 ${accentClasses}`}>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-600">{label}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-600">{label} ({unit})</p>
       <p className="mt-2 text-2xl font-semibold text-neutral-950 tabular-nums">{value}</p>
     </div>
   );
 }
 
 function formatNumber(value: number): string {
-  return value.toFixed(4);
+  return formatEngineeringValue(value);
 }
 
 function formatPercent(value: number): string {

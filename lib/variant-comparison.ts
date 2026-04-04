@@ -1,4 +1,5 @@
-import type { SavedStackVariant, StackCalculationResult } from "./types";
+import { formatEngineeringValue } from "./units";
+import type { EngineeringUnit, SavedStackVariant, StackCalculationResult } from "./types";
 
 export interface VariantComparisonMetric {
   label: string;
@@ -10,6 +11,7 @@ export interface VariantComparisonMetric {
 export interface VariantComparisonSummary {
   leftName: string;
   rightName: string;
+  unit: EngineeringUnit;
   metrics: VariantComparisonMetric[];
 }
 
@@ -24,6 +26,7 @@ export function buildVariantComparison(
   return {
     leftName: left.name,
     rightName: right.name,
+    unit: left.unit,
     metrics: [
       metric("Total nominal", left.result.totalNominal, right.result.totalNominal),
       metric("Worst-case min", left.result.worstCaseMin, right.result.worstCaseMin),
@@ -48,10 +51,10 @@ function span(result: StackCalculationResult): number {
 }
 
 function formatNumber(value: number): string {
-  return value.toFixed(4);
+  return formatEngineeringValue(value);
 }
 
 function formatDelta(value: number): string {
   const sign = value > 0 ? "+" : "";
-  return `${sign}${value.toFixed(4)}`;
+  return `${sign}${formatEngineeringValue(value)}`;
 }

@@ -1,5 +1,6 @@
 import type { MonteCarloResult } from "./monte-carlo";
-import type { StackCalculationResult, StackRow } from "./types";
+import { formatEngineeringValue } from "./units";
+import type { EngineeringUnit, StackCalculationResult, StackRow } from "./types";
 import type { ValidationResult } from "./validation";
 import { evaluateSpecLimits } from "./spec-limits";
 
@@ -8,10 +9,12 @@ export interface PdfReportInput {
   validation: ValidationResult;
   result: StackCalculationResult | null;
   monteCarloResult: MonteCarloResult | null;
+  engineeringUnit: EngineeringUnit;
   generatedAt?: Date;
 }
 
 export interface PdfReportData {
+  engineeringUnit: EngineeringUnit;
   generatedAtLabel: string;
   rowCount: number;
   validationStatus: string;
@@ -38,7 +41,14 @@ export interface PdfReportData {
   notes: string[];
 }
 
-export function buildPdfReportData({ rows, validation, result, monteCarloResult, generatedAt = new Date() }: PdfReportInput): PdfReportData {
+export function buildPdfReportData({
+  rows,
+  validation,
+  result,
+  monteCarloResult,
+  engineeringUnit,
+  generatedAt = new Date()
+}: PdfReportInput): PdfReportData {
   const summaryMetrics = result
     ? [
         { label: "Total nominal", value: formatNumber(result.totalNominal) },
@@ -64,6 +74,7 @@ export function buildPdfReportData({ rows, validation, result, monteCarloResult,
   const validationSummary = [
     { label: "Status", value: validation.isValid ? "Valid" : "Blocked" },
     { label: "Rows", value: String(rows.length) },
+    { label: "Unit", value: engineeringUnit },
     { label: "Errors", value: String(validation.errors.length) },
     {
       label: "Zero tolerance rows",
@@ -115,6 +126,7 @@ export function buildPdfReportData({ rows, validation, result, monteCarloResult,
       };
 
   return {
+    engineeringUnit,
     generatedAtLabel: formatTimestamp(generatedAt),
     rowCount: rows.length,
     validationStatus: validation.isValid ? "Valid" : "Blocked",
@@ -141,13 +153,13 @@ export function buildPdfReportData({ rows, validation, result, monteCarloResult,
       "Worst-case is deterministic and conservative.",
       "Monte Carlo uses bounded normal sampling centered on nominal values.",
       "RSS and Monte Carlo are approximations, not guarantees.",
-      "Units must remain consistent across the stack."
+      `Report values are expressed in ${engineeringUnit}.`
     ]
   };
 }
 
 function formatNumber(value: number): string {
-  return value.toFixed(4);
+  return formatEngineeringValue(value);
 }
 
 function formatContribution(nominal: string, direction: StackRow["direction"]): string {

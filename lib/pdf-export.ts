@@ -197,7 +197,7 @@ export function downloadPdfReport(input: PdfReportInput): void {
     }
   });
 
-  addHeadersAndFooters(doc, report.generatedAtLabel, report.rowCount, pageWidth, pageHeight);
+  addHeadersAndFooters(doc, report.generatedAtLabel, report.engineeringUnit, report.rowCount, pageWidth, pageHeight);
   doc.save("tolerance-stackup-report.pdf");
 }
 
@@ -346,18 +346,26 @@ function drawHistogram(
   return y;
 }
 
-function addHeadersAndFooters(doc: jsPDF, generatedAtLabel: string, rowCount: number, pageWidth: number, pageHeight: number): void {
+function addHeadersAndFooters(
+  doc: jsPDF,
+  generatedAtLabel: string,
+  engineeringUnit: string,
+  rowCount: number,
+  pageWidth: number,
+  pageHeight: number
+): void {
   const totalPages = doc.getNumberOfPages();
 
   for (let page = 1; page <= totalPages; page += 1) {
     doc.setPage(page);
-    drawPageHeader(doc, generatedAtLabel, rowCount, pageWidth, pageHeight, page, totalPages);
+    drawPageHeader(doc, generatedAtLabel, engineeringUnit, rowCount, pageWidth, pageHeight, page, totalPages);
   }
 }
 
 function drawPageHeader(
   doc: jsPDF,
   generatedAtLabel: string,
+  engineeringUnit: string,
   rowCount: number,
   pageWidth: number,
   pageHeight: number,
@@ -373,7 +381,7 @@ function drawPageHeader(
   doc.setFontSize(9);
   doc.text("Full Stackup Report", 16, HEADER_SUBTITLE_Y);
   doc.setFontSize(8);
-  doc.text(`Generated ${generatedAtLabel} | Units: mm | Rows: ${rowCount}`, 16, HEADER_META_Y);
+  doc.text(`Generated ${generatedAtLabel} | Units: ${engineeringUnit} | Rows: ${rowCount}`, 16, HEADER_META_Y);
   doc.line(16, HEADER_DIVIDER_Y, pageWidth - 16, HEADER_DIVIDER_Y);
   doc.line(16, pageHeight - PAGE_BOTTOM_MARGIN + 2, pageWidth - 16, pageHeight - PAGE_BOTTOM_MARGIN + 2);
   doc.text(`Page ${page} of ${totalPages}`, pageWidth - 16, pageHeight - PAGE_BOTTOM_MARGIN + 6, { align: "right" });

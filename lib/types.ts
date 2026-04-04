@@ -1,4 +1,5 @@
 export type StackDirection = "+" | "-";
+export type EngineeringUnit = "mm" | "in";
 
 export interface StackRow {
   id: string;
@@ -30,6 +31,7 @@ export interface StackCalculationResult {
 export interface SavedStackVariant {
   id: string;
   name: string;
+  unit: EngineeringUnit;
   rowCount: number;
   rows: StackRow[];
   result: StackCalculationResult;

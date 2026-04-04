@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ResultsPanel } from "../components/ResultsPanel";
 import { CurrentStackExpressionPanel } from "../components/CurrentStackExpressionPanel";
 import { FormulaPanel } from "../components/FormulaPanel";
@@ -11,12 +12,16 @@ import { useReportExport } from "../hooks/useReportExport";
 import { useSavedVariants } from "../hooks/useSavedVariants";
 import { useStackupRows } from "../hooks/useStackupRows";
 import { useWhatIfScenario } from "../hooks/useWhatIfScenario";
+import { samplePresets } from "../lib/sample-data";
 import { calculateStackup } from "../lib/stackup";
+import type { EngineeringUnit } from "../lib/types";
+import { convertMonteCarloResult, convertRows, convertSpecLimits } from "../lib/units";
 import { validateStackRows } from "../lib/validation";
 
 const PRESET_LABELS = ["V-01", "V-02", "V-03"] as const;
 
 export default function Home() {
+  const [engineeringUnit, setEngineeringUnit] = useState<EngineeringUnit>("mm");
   const { monteCarloResult, setMonteCarloResult, specLimits, setSpecLimits } = useMonteCarloState();
   const {
     savedVariants,
@@ -25,9 +30,10 @@ export default function Home() {
     setLeftVariantId,
     setRightVariantId,
     saveCurrentVariant,
+    convertVariantUnits,
     variantComparison
   } = useSavedVariants();
-  const { rows, updateRow, addRow, deleteRow, replaceRows, loadPreset: loadPresetRows } = useStackupRows();
+  const { rows, setRows, updateRow, addRow, deleteRow, replaceRows } = useStackupRows();
   const validation = validateStackRows(rows);
   const {
     scenarioRows,
@@ -55,11 +61,26 @@ export default function Home() {
     rows,
     validation,
     result,
-    monteCarloResult
+    monteCarloResult,
+    engineeringUnit
   });
 
+  function changeEngineeringUnit(nextUnit: EngineeringUnit) {
+    if (nextUnit === engineeringUnit) {
+      return;
+    }
+
+    const previousUnit = engineeringUnit;
+    setRows((current) => convertRows(current, previousUnit, nextUnit));
+    setSpecLimits((current) => convertSpecLimits(current, previousUnit, nextUnit));
+    setMonteCarloResult((current) => (current ? convertMonteCarloResult(current, previousUnit, nextUnit) : null));
+    convertVariantUnits(previousUnit, nextUnit);
+    setEngineeringUnit(nextUnit);
+  }
+
   function loadPreset(preset: (typeof PRESET_LABELS)[number]) {
-    loadPresetRows(preset);
+    const presetRows = samplePresets[preset].map((row) => ({ ...row }));
+    replaceRows(engineeringUnit === "mm" ? presetRows : convertRows(presetRows, "mm", engineeringUnit));
     resetWhatIfScenario();
   }
 
@@ -76,7 +97,7 @@ export default function Home() {
       return;
     }
 
-    saveCurrentVariant(rows, result);
+    saveCurrentVariant(rows, result, engineeringUnit);
   }
 
   return (
@@ -96,7 +117,22 @@ export default function Home() {
         <div className="flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">
           <span className="border border-neutral-900 bg-neutral-100 px-3 py-1.5">F-01 / F-02 / F-03</span>
           <span className="border border-neutral-900 bg-neutral-100 px-3 py-1.5">V-01 to V-05</span>
-          <span className="border border-neutral-900 bg-neutral-100 px-3 py-1.5">Units: mm</span>
+          <div className="flex overflow-hidden border border-neutral-900">
+            <button
+              type="button"
+              onClick={() => changeEngineeringUnit("mm")}
+              className={`px-3 py-1.5 transition ${engineeringUnit === "mm" ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-700 hover:bg-white"}`}
+            >
+              mm
+            </button>
+            <button
+              type="button"
+              onClick={() => changeEngineeringUnit("in")}
+              className={`border-l border-neutral-900 px-3 py-1.5 transition ${engineeringUnit === "in" ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-700 hover:bg-white"}`}
+            >
+              in
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-3">
@@ -128,11 +164,13 @@ export default function Home() {
           errorsByRow={errorsByRow}
           equationTotal={result?.totalNominal ?? null}
           equationIsValid={validation.isValid}
+          engineeringUnit={engineeringUnit}
         />
 
         <MonteCarloPanel
           rows={scenarioRows}
           isValid={validation.isValid}
+          engineeringUnit={engineeringUnit}
           onResultChange={setMonteCarloResult}
           onSpecLimitsChange={setSpecLimits}
         />
@@ -156,6 +194,7 @@ export default function Home() {
             onRightVariantChange={setRightVariantId}
             onSaveVariant={handleSaveVariant}
             variantComparison={variantComparison}
+            engineeringUnit={engineeringUnit}
           />
         </div>
       </section>

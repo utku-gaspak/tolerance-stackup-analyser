@@ -3,7 +3,7 @@
 import { downloadReportJson } from "../lib/json-export";
 import { downloadPdfReport } from "../lib/pdf-export";
 import type { MonteCarloResult } from "../lib/monte-carlo";
-import type { StackCalculationResult, StackRow } from "../lib/types";
+import type { EngineeringUnit, StackCalculationResult, StackRow } from "../lib/types";
 import type { ValidationResult } from "../lib/validation";
 
 interface UseReportExportOptions {
@@ -11,14 +11,22 @@ interface UseReportExportOptions {
   validation: ValidationResult;
   result: StackCalculationResult | null;
   monteCarloResult: MonteCarloResult | null;
+  engineeringUnit: EngineeringUnit;
 }
 
-export function useReportExport({ rows, validation, result, monteCarloResult }: UseReportExportOptions) {
+export function useReportExport({
+  rows,
+  validation,
+  result,
+  monteCarloResult,
+  engineeringUnit
+}: UseReportExportOptions) {
   const input = {
     rows,
     validation,
     result,
-    monteCarloResult
+    monteCarloResult,
+    engineeringUnit
   };
 
   function exportPdfReport() {

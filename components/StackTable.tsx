@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, type ChangeEvent } from "react";
-import type { RowValidationError, StackDirection, StackRow } from "../lib/types";
+import { formatEngineeringValue } from "../lib/units";
+import type { EngineeringUnit, RowValidationError, StackDirection, StackRow } from "../lib/types";
 import { StackRowEditor } from "./StackRowEditor";
 
 interface StackTableProps {
@@ -18,6 +19,7 @@ interface StackTableProps {
   errorsByRow: Record<string, Partial<Record<RowValidationError["field"], string>>>;
   equationTotal: number | null;
   equationIsValid: boolean;
+  engineeringUnit: EngineeringUnit;
 }
 
 export function StackTable({
@@ -33,7 +35,8 @@ export function StackTable({
   onWhatIfRowPercentChange,
   errorsByRow,
   equationTotal,
-  equationIsValid
+  equationIsValid,
+  engineeringUnit
 }: StackTableProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const equationTokens = rows.map((row, index) => ({
@@ -102,7 +105,7 @@ export function StackTable({
             <p className="mt-1 text-sm text-neutral-700">Live signed nominal contribution by row.</p>
           </div>
           <div className="border border-neutral-900 bg-white px-3 py-1.5 text-sm font-semibold text-neutral-950 tabular-nums">
-            {equationIsValid && equationTotal !== null ? `${equationTotal.toFixed(2)} mm` : "Pending"}
+            {equationIsValid && equationTotal !== null ? `${formatEngineeringValue(equationTotal)} ${engineeringUnit}` : "Pending"}
           </div>
         </div>
 
@@ -188,7 +191,7 @@ export function StackTable({
             Label is required and nominal must be a valid number.
           </div>
           <div className="border border-neutral-900 bg-white p-2">
-            Upper and lower tolerances must be non-negative numbers. `0.00` is allowed.
+            Upper and lower tolerances must be non-negative numbers in {engineeringUnit}. `0.00` is allowed.
           </div>
           <div className="border border-neutral-900 bg-white p-2">
             Select `+` to add a row to the stack or `-` to subtract it.
@@ -216,7 +219,7 @@ export function StackTable({
               <tr>
                 <th className="border-b border-r border-neutral-900 px-3 py-2 text-center">#</th>
                 <th className="border-b border-r border-neutral-900 px-3 py-2 text-left">Label</th>
-                <th className="border-b border-r border-neutral-900 px-3 py-2 text-right">Nominal (mm)</th>
+                <th className="border-b border-r border-neutral-900 px-3 py-2 text-right">Nominal ({engineeringUnit})</th>
                 <th className="border-b border-r border-neutral-900 px-3 py-2 text-right">Upper Tol</th>
                 <th className="border-b border-r border-neutral-900 px-3 py-2 text-right">Lower Tol</th>
                 <th className="border-b border-r border-neutral-900 px-3 py-2 text-left">Direction</th>

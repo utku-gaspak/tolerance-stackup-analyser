@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { buildVariantComparison } from "../lib/variant-comparison";
-import type { SavedStackVariant, StackCalculationResult, StackRow } from "../lib/types";
+import { convertSavedVariants } from "../lib/units";
+import type { EngineeringUnit, SavedStackVariant, StackCalculationResult, StackRow } from "../lib/types";
 
 export function useSavedVariants() {
   const [savedVariants, setSavedVariants] = useState<SavedStackVariant[]>([]);
@@ -16,12 +17,13 @@ export function useSavedVariants() {
     [leftVariant, rightVariant]
   );
 
-  function saveCurrentVariant(rows: StackRow[], result: StackCalculationResult) {
+  function saveCurrentVariant(rows: StackRow[], result: StackCalculationResult, unit: EngineeringUnit) {
     setSavedVariants((current) => {
       const nextIndex = current.length + 1;
       const nextVariant: SavedStackVariant = {
         id: `variant-${Date.now()}-${nextIndex}`,
         name: `Variant ${nextIndex}`,
+        unit,
         rowCount: rows.length,
         rows: rows.map((row) => ({ ...row })),
         result: { ...result }
@@ -41,6 +43,10 @@ export function useSavedVariants() {
     });
   }
 
+  function convertVariantUnits(from: EngineeringUnit, to: EngineeringUnit) {
+    setSavedVariants((current) => convertSavedVariants(current, from, to));
+  }
+
   return {
     savedVariants,
     leftVariantId,
@@ -48,6 +54,7 @@ export function useSavedVariants() {
     setLeftVariantId,
     setRightVariantId,
     saveCurrentVariant,
+    convertVariantUnits,
     variantComparison
   };
 }

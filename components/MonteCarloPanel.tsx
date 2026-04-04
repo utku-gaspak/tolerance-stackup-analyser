@@ -2,22 +2,36 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { runMonteCarloSimulation, type MonteCarloResult, type MonteCarloSpecLimits } from "../lib/monte-carlo";
-import type { ParsedStackRow } from "../lib/types";
+import {
+  convertMonteCarloResult,
+  convertSpecLimits,
+  formatEditableEngineeringValue,
+  formatEngineeringValue
+} from "../lib/units";
+import type { EngineeringUnit, ParsedStackRow } from "../lib/types";
 
 interface MonteCarloPanelProps {
   rows: ParsedStackRow[];
   isValid: boolean;
+  engineeringUnit: EngineeringUnit;
   onResultChange?: (result: MonteCarloResult | null) => void;
   onSpecLimitsChange?: (specLimits: MonteCarloSpecLimits) => void;
 }
 
 const DEFAULT_SAMPLE_COUNT = 2000;
 
-export function MonteCarloPanel({ rows, isValid, onResultChange, onSpecLimitsChange }: MonteCarloPanelProps) {
+export function MonteCarloPanel({
+  rows,
+  isValid,
+  engineeringUnit,
+  onResultChange,
+  onSpecLimitsChange
+}: MonteCarloPanelProps) {
   const [sampleCount, setSampleCount] = useState(DEFAULT_SAMPLE_COUNT);
   const [seed, setSeed] = useState(1);
   const [lowerSpecLimit, setLowerSpecLimit] = useState("");
   const [upperSpecLimit, setUpperSpecLimit] = useState("");
+  const previousUnitRef = useRef(engineeringUnit);
   const [result, setResult] = useState<MonteCarloResult | null>(() =>
     isValid ? runMonteCarloSimulation(rows, DEFAULT_SAMPLE_COUNT, 1) : null
   );
@@ -52,6 +66,23 @@ export function MonteCarloPanel({ rows, isValid, onResultChange, onSpecLimitsCha
   useEffect(() => {
     onSpecLimitsChange?.({ lower: parsedLowerSpecLimit, upper: parsedUpperSpecLimit });
   }, [parsedLowerSpecLimit, parsedUpperSpecLimit, onSpecLimitsChange]);
+
+  useEffect(() => {
+    const previousUnit = previousUnitRef.current;
+    if (previousUnit === engineeringUnit) {
+      return;
+    }
+
+    const nextSpecLimits = convertSpecLimits(
+      { lower: parsedLowerSpecLimit, upper: parsedUpperSpecLimit },
+      previousUnit,
+      engineeringUnit
+    );
+    setLowerSpecLimit(formatOptionalLimit(nextSpecLimits.lower));
+    setUpperSpecLimit(formatOptionalLimit(nextSpecLimits.upper));
+    setResult((current) => (current ? convertMonteCarloResult(current, previousUnit, engineeringUnit) : null));
+    previousUnitRef.current = engineeringUnit;
+  }, [engineeringUnit, parsedLowerSpecLimit, parsedUpperSpecLimit]);
 
   function runSimulation() {
     if (!isValid || rows.length === 0) {
@@ -130,10 +161,12 @@ export function MonteCarloPanel({ rows, isValid, onResultChange, onSpecLimitsCha
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <label className="block">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-600">Lower spec limit</span>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-600">
+            Lower spec limit ({engineeringUnit})
+          </span>
           <input
             type="number"
-            step="0.01"
+            step={engineeringUnit === "mm" ? "0.01" : "0.001"}
             value={lowerSpecLimit}
             onChange={(event) => setLowerSpecLimit(event.target.value)}
             placeholder="Optional"
@@ -141,10 +174,12 @@ export function MonteCarloPanel({ rows, isValid, onResultChange, onSpecLimitsCha
           />
         </label>
         <label className="block">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-600">Upper spec limit</span>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-600">
+            Upper spec limit ({engineeringUnit})
+          </span>
           <input
             type="number"
-            step="0.01"
+            step={engineeringUnit === "mm" ? "0.01" : "0.001"}
             value={upperSpecLimit}
             onChange={(event) => setUpperSpecLimit(event.target.value)}
             placeholder="Optional"
@@ -165,10 +200,10 @@ export function MonteCarloPanel({ rows, isValid, onResultChange, onSpecLimitsCha
       ) : result ? (
         <>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <StatBox label="Mean" value={formatNumber(result.mean)} />
-            <StatBox label="Range" value={`${formatNumber(result.min)} to ${formatNumber(result.max)}`} />
-            <StatBox label="P05" value={formatNumber(result.p05)} />
-            <StatBox label="P95" value={formatNumber(result.p95)} />
+            <StatBox label={`Mean (${engineeringUnit})`} value={formatNumber(result.mean)} />
+            <StatBox label={`Range (${engineeringUnit})`} value={`${formatNumber(result.min)} to ${formatNumber(result.max)}`} />
+            <StatBox label={`P05 (${engineeringUnit})`} value={formatNumber(result.p05)} />
+            <StatBox label={`P95 (${engineeringUnit})`} value={formatNumber(result.p95)} />
             {result.passRate !== null ? (
               <StatBox label="Yield" value={formatPercent(result.passRate)} />
             ) : (
@@ -191,7 +226,9 @@ export function MonteCarloPanel({ rows, isValid, onResultChange, onSpecLimitsCha
           <div className="mt-4 border border-neutral-900 bg-neutral-100 p-3">
             <div className="flex items-center justify-between gap-4 border-b border-neutral-900 pb-2">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Histogram</p>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">{result.sampleCount} samples</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">
+                {result.sampleCount} samples / {engineeringUnit}
+              </p>
             </div>
             <div className="mt-3 grid gap-2">
               {result.histogram.map((bin) => (
@@ -228,7 +265,7 @@ function StatBox({ label, value }: { label: string; value: string }) {
 }
 
 function formatNumber(value: number): string {
-  return value.toFixed(4);
+  return formatEngineeringValue(value);
 }
 
 function formatPercent(value: number): string {
@@ -248,4 +285,12 @@ function parseOptionalLimit(value: string): number | null {
   }
 
   return parsed;
+}
+
+function formatOptionalLimit(value: number | null): string {
+  if (value === null) {
+    return "";
+  }
+
+  return formatEditableEngineeringValue(value);
 }

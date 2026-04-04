@@ -7,6 +7,7 @@ describe("variant comparison", () => {
     const left: SavedStackVariant = {
       id: "a",
       name: "Variant 1",
+      unit: "mm",
       rowCount: 3,
       rows: [],
       result: {
@@ -21,6 +22,7 @@ describe("variant comparison", () => {
     const right: SavedStackVariant = {
       id: "b",
       name: "Variant 2",
+      unit: "mm",
       rowCount: 3,
       rows: [],
       result: {
@@ -37,6 +39,7 @@ describe("variant comparison", () => {
 
     expect(comparison?.leftName).toBe("Variant 1");
     expect(comparison?.rightName).toBe("Variant 2");
+    expect(comparison?.unit).toBe("mm");
     expect(comparison?.metrics).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ label: "Total nominal", leftValue: "35.0000", rightValue: "35.5000", delta: "+0.5000" }),
@@ -50,6 +53,7 @@ describe("variant comparison", () => {
     const variant: SavedStackVariant = {
       id: "a",
       name: "Variant 1",
+      unit: "in",
       rowCount: 1,
       rows: [],
       result: {

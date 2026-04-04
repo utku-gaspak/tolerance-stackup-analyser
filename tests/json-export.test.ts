@@ -16,12 +16,20 @@ describe("JSON report export", () => {
       validation,
       result,
       monteCarloResult,
+      engineeringUnit: "in",
       generatedAt: new Date("2026-04-01T15:30:00Z")
     });
 
-    const parsed = JSON.parse(json) as { rowCount: number; validationStatus: string; monteCarlo: { available: boolean }; summaryMetrics: Array<{ label: string; value: string }> };
+    const parsed = JSON.parse(json) as {
+      engineeringUnit: string;
+      rowCount: number;
+      validationStatus: string;
+      monteCarlo: { available: boolean };
+      summaryMetrics: Array<{ label: string; value: string }>;
+    };
 
     expect(json.endsWith("\n")).toBe(true);
+    expect(parsed.engineeringUnit).toBe("in");
     expect(parsed.rowCount).toBe(3);
     expect(parsed.validationStatus).toBe("Valid");
     expect(parsed.monteCarlo.available).toBe(true);

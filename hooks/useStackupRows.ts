@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { defaultSampleRows, samplePresets } from "../lib/sample-data";
+import { defaultSampleRows } from "../lib/sample-data";
 import type { StackRow } from "../lib/types";
 
 interface UseStackupRowsOptions {
@@ -38,17 +38,12 @@ export function useStackupRows({ onRowsReplaced }: UseStackupRowsOptions = {}) {
     onRowsReplaced?.();
   }
 
-  function loadPreset(preset: keyof typeof samplePresets) {
-    replaceRows(samplePresets[preset].map((row) => ({ ...row })));
-  }
-
   return {
     rows,
     setRows,
     updateRow,
     addRow,
     deleteRow,
-    replaceRows,
-    loadPreset
+    replaceRows
   };
 }
