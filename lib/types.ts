@@ -27,6 +27,14 @@ export interface StackCalculationResult {
   rssMax: number;
 }
 
+export interface SavedStackVariant {
+  id: string;
+  name: string;
+  rowCount: number;
+  rows: StackRow[];
+  result: StackCalculationResult;
+}
+
 export interface RowValidationError {
   id: string;
   field: "label" | "nominal" | "plusTolerance" | "minusTolerance" | "direction";

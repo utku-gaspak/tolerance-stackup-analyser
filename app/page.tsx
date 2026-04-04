@@ -8,6 +8,7 @@ import { StackTable } from "../components/StackTable";
 import { useCsvImportExport } from "../hooks/useCsvImportExport";
 import { useMonteCarloState } from "../hooks/useMonteCarloState";
 import { useReportExport } from "../hooks/useReportExport";
+import { useSavedVariants } from "../hooks/useSavedVariants";
 import { useStackupRows } from "../hooks/useStackupRows";
 import { useWhatIfScenario } from "../hooks/useWhatIfScenario";
 import { calculateStackup } from "../lib/stackup";
@@ -17,6 +18,15 @@ const PRESET_LABELS = ["V-01", "V-02", "V-03"] as const;
 
 export default function Home() {
   const { monteCarloResult, setMonteCarloResult, specLimits, setSpecLimits } = useMonteCarloState();
+  const {
+    savedVariants,
+    leftVariantId,
+    rightVariantId,
+    setLeftVariantId,
+    setRightVariantId,
+    saveCurrentVariant,
+    variantComparison
+  } = useSavedVariants();
   const { rows, updateRow, addRow, deleteRow, replaceRows, loadPreset: loadPresetRows } = useStackupRows();
   const validation = validateStackRows(rows);
   const {
@@ -59,6 +69,14 @@ export default function Home() {
     if (didImport) {
       resetWhatIfScenario();
     }
+  }
+
+  function handleSaveVariant() {
+    if (!result) {
+      return;
+    }
+
+    saveCurrentVariant(rows, result);
   }
 
   return (
@@ -131,6 +149,13 @@ export default function Home() {
             zeroToleranceRows={zeroToleranceRows}
             onExportPdf={exportPdfReport}
             onExportJson={exportJsonReport}
+            savedVariants={savedVariants}
+            leftVariantId={leftVariantId}
+            rightVariantId={rightVariantId}
+            onLeftVariantChange={setLeftVariantId}
+            onRightVariantChange={setRightVariantId}
+            onSaveVariant={handleSaveVariant}
+            variantComparison={variantComparison}
           />
         </div>
       </section>

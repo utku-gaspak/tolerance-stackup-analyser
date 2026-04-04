@@ -1,6 +1,7 @@
 import type { RowValidationError } from "../lib/types";
-import type { ParsedStackRow, StackCalculationResult } from "../lib/types";
+import type { ParsedStackRow, SavedStackVariant, StackCalculationResult } from "../lib/types";
 import { calculateSensitivityAnalysis } from "../lib/sensitivity";
+import type { VariantComparisonSummary } from "../lib/variant-comparison";
 import type { MonteCarloSpecLimits } from "../lib/monte-carlo";
 import { evaluateSpecLimits } from "../lib/spec-limits";
 
@@ -15,9 +16,34 @@ interface ResultsPanelProps {
   specLimits: MonteCarloSpecLimits;
   onExportPdf: () => void;
   onExportJson: () => void;
+  savedVariants: SavedStackVariant[];
+  leftVariantId: string;
+  rightVariantId: string;
+  onLeftVariantChange: (id: string) => void;
+  onRightVariantChange: (id: string) => void;
+  onSaveVariant: () => void;
+  variantComparison: VariantComparisonSummary | null;
 }
 
-export function ResultsPanel({ result, baseResult, rows, specLimits, isValid, errorCount, errors, zeroToleranceRows, onExportPdf, onExportJson }: ResultsPanelProps) {
+export function ResultsPanel({
+  result,
+  baseResult,
+  rows,
+  specLimits,
+  isValid,
+  errorCount,
+  errors,
+  zeroToleranceRows,
+  onExportPdf,
+  onExportJson,
+  savedVariants,
+  leftVariantId,
+  rightVariantId,
+  onLeftVariantChange,
+  onRightVariantChange,
+  onSaveVariant,
+  variantComparison
+}: ResultsPanelProps) {
   const sensitivityItems = isValid ? calculateSensitivityAnalysis(rows).slice(0, 5) : [];
   const specCheck = evaluateSpecLimits(result, specLimits);
   const comparisonCards = result && baseResult && (result.rssTolerance !== baseResult.rssTolerance || result.worstCaseMin !== baseResult.worstCaseMin || result.worstCaseMax !== baseResult.worstCaseMax)
@@ -49,6 +75,14 @@ export function ResultsPanel({ result, baseResult, rows, specLimits, isValid, er
             {isValid ? "Valid" : "Blocked"}
           </span>
           <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={onSaveVariant}
+              disabled={!result}
+              className="col-span-2 border border-neutral-900 bg-neutral-100 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-900 transition hover:bg-white disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-500"
+            >
+              Save Variant
+            </button>
             <button
               type="button"
               onClick={onExportJson}
@@ -111,6 +145,74 @@ export function ResultsPanel({ result, baseResult, rows, specLimits, isValid, er
           </div>
         </div>
       ) : null}
+
+      <div className="mt-4 border border-neutral-900 bg-white p-3">
+        <div className="flex items-center justify-between gap-4 border-b border-neutral-900 pb-2">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Saved variants</p>
+            <h3 className="mt-1 text-sm font-semibold tracking-tight text-neutral-950">Compare snapshots</h3>
+          </div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">{savedVariants.length} saved</p>
+        </div>
+
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <label className="block text-xs text-neutral-700">
+            <span className="font-semibold uppercase tracking-[0.16em] text-neutral-600">Variant A</span>
+            <select
+              value={leftVariantId}
+              onChange={(event) => onLeftVariantChange(event.target.value)}
+              className="mt-1 block w-full border border-neutral-900 bg-white px-3 py-2 text-sm text-neutral-950 outline-none"
+            >
+              <option value="">Select variant</option>
+              {savedVariants.map((variant) => (
+                <option key={variant.id} value={variant.id}>
+                  {variant.name} ({variant.rowCount} rows)
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-xs text-neutral-700">
+            <span className="font-semibold uppercase tracking-[0.16em] text-neutral-600">Variant B</span>
+            <select
+              value={rightVariantId}
+              onChange={(event) => onRightVariantChange(event.target.value)}
+              className="mt-1 block w-full border border-neutral-900 bg-white px-3 py-2 text-sm text-neutral-950 outline-none"
+            >
+              <option value="">Select variant</option>
+              {savedVariants.map((variant) => (
+                <option key={variant.id} value={variant.id}>
+                  {variant.name} ({variant.rowCount} rows)
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        {variantComparison ? (
+          <div className="mt-4">
+            <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_6rem] text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-600">
+              <span>Metric</span>
+              <span>{variantComparison.leftName}</span>
+              <span>{variantComparison.rightName}</span>
+              <span className="text-right">Delta</span>
+            </div>
+            <div className="mt-2 grid gap-2">
+              {variantComparison.metrics.map((metric) => (
+                <div key={metric.label} className="grid gap-2 border border-neutral-900 bg-neutral-100 p-2 text-xs text-neutral-800 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_6rem] sm:items-center">
+                  <span className="font-semibold text-neutral-950">{metric.label}</span>
+                  <span className="font-mono tabular-nums">{metric.leftValue}</span>
+                  <span className="font-mono tabular-nums">{metric.rightValue}</span>
+                  <span className="text-right font-mono tabular-nums text-neutral-950">{metric.delta}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <p className="mt-3 text-xs leading-5 text-neutral-600">
+            Save at least two valid snapshots, then select Variant A and Variant B to compare nominal, worst-case, and RSS deltas.
+          </p>
+        )}
+      </div>
 
       <div className="mt-4 space-y-4">
         <div className="border border-neutral-900 bg-neutral-100 p-3 text-sm leading-6 text-neutral-700">
