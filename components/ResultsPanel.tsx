@@ -104,12 +104,13 @@ export function ResultsPanel({ result, baseResult, rows, specLimits, isValid, er
 
       <div className="mt-4 space-y-4">
         <div className="border border-neutral-900 bg-neutral-100 p-3 text-sm leading-6 text-neutral-700">
-          RSS is shown as an approximation. Worst-case is deterministic and conservative.
+          Worst-case is deterministic and conservative. RSS is an approximation built from each row&apos;s average
+          tolerance width and assumes independent contributors.
         </div>
 
         <div className="border border-neutral-900 bg-white p-3 text-xs leading-5 text-neutral-600">
-          Output is formatted for engineering review: nominal values are exact, worst-case is conservative, and RSS is a
-          statistical estimate.
+          Output is formatted for engineering review: nominal values are exact, worst-case is a stack boundary, and RSS
+          is a statistical estimate rather than a pass/fail guarantee.
         </div>
 
         {isValid && zeroToleranceRows > 0 ? (

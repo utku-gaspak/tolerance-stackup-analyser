@@ -103,8 +103,8 @@ export function buildPdfReportData({ rows, validation, result, monteCarloResult,
         })),
         note:
           monteCarloResult.passRate !== null
-            ? `Normal sampling with sigma approximated from row tolerance and clipped to bounds. Yield is evaluated against the configured spec limits.`
-            : "Normal sampling with sigma approximated from row tolerance and clipped to bounds."
+            ? "Normal sampling with sigma approximated from average row tolerance, clipped to row bounds, and evaluated against the configured spec limits. Yield is an estimate, not a guarantee."
+            : "Normal sampling with sigma approximated from average row tolerance and clipped to row bounds. Monte Carlo output is an estimate, not a guarantee."
       }
     : {
         available: false,
@@ -136,9 +136,10 @@ export function buildPdfReportData({ rows, validation, result, monteCarloResult,
     monteCarlo,
     notes: [
       "1D linear chain only.",
-      "RSS assumes independent contributors.",
+      "RSS uses average plus/minus tolerance per row and assumes independent contributors.",
       "Asymmetric tolerances are allowed.",
       "Worst-case is deterministic and conservative.",
+      "Monte Carlo uses bounded normal sampling centered on nominal values.",
       "RSS and Monte Carlo are approximations, not guarantees.",
       "Units must remain consistent across the stack."
     ]

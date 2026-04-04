@@ -125,7 +125,7 @@ export function MonteCarloPanel({ rows, isValid, onResultChange, onSpecLimitsCha
 
       <div className="mt-3 border border-neutral-900 bg-neutral-100 p-3 text-xs leading-5 text-neutral-700">
         Set optional lower and upper spec limits to calculate yield. The pass rate is the share of Monte Carlo samples
-        that stay inside that band.
+        that stay inside that band, not a deterministic acceptance proof.
       </div>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -154,7 +154,8 @@ export function MonteCarloPanel({ rows, isValid, onResultChange, onSpecLimitsCha
       </div>
 
       <div className="mt-3 text-xs leading-5 text-neutral-600">
-        Normal sampling with σ ≈ tolerance / 3, clipped to each row tolerance bounds. Yield is calculated against the optional spec limits.
+        Monte Carlo uses a normal sample around each nominal with sigma approximated as average tolerance / 3, then
+        clips each draw to that row&apos;s tolerance bounds. It is an estimate of distribution shape, not a guarantee.
       </div>
 
       {!isValid ? (
@@ -182,7 +183,8 @@ export function MonteCarloPanel({ rows, isValid, onResultChange, onSpecLimitsCha
 
           {result.passRate !== null ? (
             <div className="mt-4 border border-neutral-900 bg-neutral-100 p-3 text-sm leading-6 text-neutral-800">
-              Yield estimate: {formatPercent(result.passRate)} pass rate across {result.sampleCount} samples.
+              Yield estimate: {formatPercent(result.passRate)} pass rate across {result.sampleCount} bounded random
+              samples. Use worst-case for conservative release decisions.
             </div>
           ) : null}
 

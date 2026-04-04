@@ -31,6 +31,8 @@ describe("PDF report data", () => {
         expect.objectContaining({ label: "Seed", value: "42" })
       ])
     );
+    expect(report.monteCarlo.note).toContain("estimate, not a guarantee");
+    expect(report.notes).toContain("Monte Carlo uses bounded normal sampling centered on nominal values.");
     expect(report.notes).toContain("Worst-case is deterministic and conservative.");
   });
 
@@ -111,6 +113,7 @@ describe("PDF report data", () => {
         expect.objectContaining({ label: "In spec", value: `${monteCarloResult.passCount}/${monteCarloResult.sampleCount}` })
       ])
     );
-    expect(report.monteCarlo.note).toContain("Yield is evaluated against the configured spec limits.");
+    expect(report.monteCarlo.note).toContain("configured spec limits");
+    expect(report.monteCarlo.note).toContain("estimate, not a guarantee");
   });
 });

@@ -34,7 +34,7 @@ export function FormulaPanel({ rows, compact = false }: FormulaPanelProps) {
             id="F-03"
             title="RSS approximation"
             formula="RSS_tol = sqrt(Σ(((t_plus_i + t_minus_i)/2)^2))"
-            note="Approximation band, not worst-case."
+            note="Uses average row tolerance and assumes independent contributors."
           />
         </div>
 
@@ -47,7 +47,7 @@ export function FormulaPanel({ rows, compact = false }: FormulaPanelProps) {
             <span>1D linear chain only</span>
             <span>RSS assumes independence</span>
             <span>Asymmetric tolerances supported</span>
-            <span>Monte Carlo is an estimate</span>
+            <span>Monte Carlo uses bounded normal sampling</span>
           </div>
         </article>
 
@@ -89,8 +89,13 @@ export function FormulaPanel({ rows, compact = false }: FormulaPanelProps) {
           id="F-03"
           title="RSS approximation"
           formula="RSS_tol = sqrt(Σ(((t_plus_i + t_minus_i)/2)^2))"
-          note="Used only as an approximation band, not a replacement for worst-case."
+          note="Uses the average of plus/minus tolerance per row, assumes independence, and is not a replacement for worst-case."
         />
+      </div>
+
+      <div className="mt-4 border border-neutral-900 bg-neutral-100 p-3 text-xs leading-5 text-neutral-700">
+        Monte Carlo uses normal sampling centered on nominal values with sigma approximated from row tolerance and then
+        clips samples to each row&apos;s tolerance bounds. Treat yield as an estimate, not a guarantee.
       </div>
 
       <div className="mt-4 border border-neutral-900 bg-neutral-100 p-3 text-xs leading-5 text-neutral-700">
