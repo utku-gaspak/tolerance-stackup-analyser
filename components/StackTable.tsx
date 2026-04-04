@@ -7,6 +7,8 @@ import { StackRowEditor } from "./StackRowEditor";
 
 interface StackTableProps {
   rows: StackRow[];
+  presetLabels: readonly string[];
+  onLoadPreset: (preset: string) => void;
   onChangeRow: (id: string, field: keyof StackRow, value: string) => void;
   onDeleteRow: (id: string) => void;
   onAddRow: () => void;
@@ -24,6 +26,8 @@ interface StackTableProps {
 
 export function StackTable({
   rows,
+  presetLabels,
+  onLoadPreset,
   onChangeRow,
   onDeleteRow,
   onAddRow,
@@ -126,6 +130,96 @@ export function StackTable({
         </p>
       </div>
 
+      <div className="mt-4 border border-neutral-900 bg-neutral-100 p-3">
+        <div className="flex items-start justify-between gap-4 border-b border-neutral-900 pb-2">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Reference presets</p>
+            <h3 className="mt-1 text-sm font-semibold tracking-tight text-neutral-950">Load a known validation stack</h3>
+          </div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">V-01 to V-03</p>
+        </div>
+        <p className="mt-3 text-xs leading-5 text-neutral-700">
+          Use these presets to start from the documented reference cases before editing rows manually.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {presetLabels.map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              onClick={() => onLoadPreset(preset)}
+              className="border border-neutral-900 bg-white px-3 py-2 text-sm font-medium text-neutral-900 transition hover:bg-neutral-50"
+            >
+              Load {preset}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-4 overflow-hidden border border-neutral-900">
+        <div className="overflow-x-auto">
+          <table className="w-full table-fixed border-collapse">
+            <colgroup>
+              <col className="w-10" />
+              <col className="w-[12.8%] min-w-[6.4rem]" />
+              <col className="w-28" />
+              <col className="w-28" />
+              <col className="w-28" />
+              <col className="w-[6.75rem]" />
+              <col className="w-[8.1rem]" />
+              <col className="w-24" />
+            </colgroup>
+            <thead className="bg-neutral-200 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">
+              <tr>
+                <th className="border-b border-r border-neutral-900 px-3 py-2 text-center">#</th>
+                <th className="border-b border-r border-neutral-900 px-3 py-2 text-left">Label</th>
+                <th className="border-b border-r border-neutral-900 px-3 py-2 text-right">Nominal ({engineeringUnit})</th>
+                <th className="border-b border-r border-neutral-900 px-3 py-2 text-right">Upper Tol</th>
+                <th className="border-b border-r border-neutral-900 px-3 py-2 text-right">Lower Tol</th>
+                <th className="border-b border-r border-neutral-900 px-3 py-2 text-left">Direction</th>
+                <th className="border-b border-r border-neutral-900 px-3 py-2 text-right">Contribution</th>
+                <th className="border-b border-neutral-900 px-3 py-2 text-center">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, index) => (
+                <StackRowEditor
+                  key={row.id}
+                  index={index + 1}
+                  row={row}
+                  onChangeRow={onChangeRow}
+                  onDeleteRow={onDeleteRow}
+                  errors={errorsByRow[row.id]}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="mt-4 border border-neutral-900 bg-neutral-100 p-3 text-xs leading-5 text-neutral-700">
+        <div className="flex items-center justify-between gap-4 border-b border-neutral-900 pb-2">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Input guide</p>
+            <h3 className="mt-1 text-sm font-semibold tracking-tight text-neutral-950">Validation rules</h3>
+          </div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Always active</p>
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <div className="border border-neutral-900 bg-white p-2">
+            Label is required and nominal must be a valid number.
+          </div>
+          <div className="border border-neutral-900 bg-white p-2">
+            Upper and lower tolerances must be non-negative numbers in {engineeringUnit}. `0.00` is allowed.
+          </div>
+          <div className="border border-neutral-900 bg-white p-2">
+            Select `+` to add a row to the stack or `-` to subtract it.
+          </div>
+          <div className="border border-neutral-900 bg-white p-2">
+            Zero-tolerance rows stay fixed at nominal and are still valid.
+          </div>
+        </div>
+      </div>
+
       <div className="mt-4 border border-neutral-900 bg-white p-3">
         <div className="flex items-start justify-between gap-4 border-b border-neutral-900 pb-2">
           <div>
@@ -175,71 +269,6 @@ export function StackTable({
               </div>
             );
           })}
-        </div>
-      </div>
-
-      <div className="mt-4 border border-neutral-900 bg-neutral-100 p-3 text-xs leading-5 text-neutral-700">
-        <div className="flex items-center justify-between gap-4 border-b border-neutral-900 pb-2">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Input guide</p>
-            <h3 className="mt-1 text-sm font-semibold tracking-tight text-neutral-950">Validation rules</h3>
-          </div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Always active</p>
-        </div>
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          <div className="border border-neutral-900 bg-white p-2">
-            Label is required and nominal must be a valid number.
-          </div>
-          <div className="border border-neutral-900 bg-white p-2">
-            Upper and lower tolerances must be non-negative numbers in {engineeringUnit}. `0.00` is allowed.
-          </div>
-          <div className="border border-neutral-900 bg-white p-2">
-            Select `+` to add a row to the stack or `-` to subtract it.
-          </div>
-          <div className="border border-neutral-900 bg-white p-2">
-            Zero-tolerance rows stay fixed at nominal and are still valid.
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-4 overflow-hidden border border-neutral-900">
-        <div className="overflow-x-auto">
-          <table className="w-full table-fixed border-collapse">
-            <colgroup>
-              <col className="w-10" />
-              <col className="w-[12.8%] min-w-[6.4rem]" />
-              <col className="w-28" />
-              <col className="w-28" />
-              <col className="w-28" />
-              <col className="w-[6.75rem]" />
-              <col className="w-[8.1rem]" />
-              <col className="w-24" />
-            </colgroup>
-            <thead className="bg-neutral-200 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">
-              <tr>
-                <th className="border-b border-r border-neutral-900 px-3 py-2 text-center">#</th>
-                <th className="border-b border-r border-neutral-900 px-3 py-2 text-left">Label</th>
-                <th className="border-b border-r border-neutral-900 px-3 py-2 text-right">Nominal ({engineeringUnit})</th>
-                <th className="border-b border-r border-neutral-900 px-3 py-2 text-right">Upper Tol</th>
-                <th className="border-b border-r border-neutral-900 px-3 py-2 text-right">Lower Tol</th>
-                <th className="border-b border-r border-neutral-900 px-3 py-2 text-left">Direction</th>
-                <th className="border-b border-r border-neutral-900 px-3 py-2 text-right">Contribution</th>
-                <th className="border-b border-neutral-900 px-3 py-2 text-center">Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, index) => (
-                <StackRowEditor
-                  key={row.id}
-                  index={index + 1}
-                  row={row}
-                  onChangeRow={onChangeRow}
-                  onDeleteRow={onDeleteRow}
-                  errors={errorsByRow[row.id]}
-                />
-              ))}
-            </tbody>
-          </table>
         </div>
       </div>
     </section>

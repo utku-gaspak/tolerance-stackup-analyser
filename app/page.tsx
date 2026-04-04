@@ -134,24 +134,13 @@ export default function Home() {
             </button>
           </div>
         </div>
-
-        <div className="flex flex-wrap gap-3">
-          {PRESET_LABELS.map((preset) => (
-            <button
-              key={preset}
-              type="button"
-              onClick={() => loadPreset(preset)}
-              className="border border-neutral-900 bg-white px-4 py-2 text-sm font-medium text-neutral-900 transition hover:bg-neutral-100"
-            >
-              Load {preset}
-            </button>
-          ))}
-        </div>
       </section>
 
       <section className="grid items-stretch gap-5 2xl:grid-cols-[minmax(0,1.7fr)_minmax(0,0.95fr)_minmax(0,0.95fr)]">
         <StackTable
           rows={rows}
+          presetLabels={PRESET_LABELS}
+          onLoadPreset={loadPreset}
           onAddRow={addRow}
           onImportRows={importRows}
           onExportRows={exportRowsCsv}
