@@ -14,9 +14,10 @@ interface ResultsPanelProps {
   rows: ParsedStackRow[];
   specLimits: MonteCarloSpecLimits;
   onExportPdf: () => void;
+  onExportJson: () => void;
 }
 
-export function ResultsPanel({ result, baseResult, rows, specLimits, isValid, errorCount, errors, zeroToleranceRows, onExportPdf }: ResultsPanelProps) {
+export function ResultsPanel({ result, baseResult, rows, specLimits, isValid, errorCount, errors, zeroToleranceRows, onExportPdf, onExportJson }: ResultsPanelProps) {
   const sensitivityItems = isValid ? calculateSensitivityAnalysis(rows).slice(0, 5) : [];
   const specCheck = evaluateSpecLimits(result, specLimits);
   const comparisonCards = result && baseResult && (result.rssTolerance !== baseResult.rssTolerance || result.worstCaseMin !== baseResult.worstCaseMin || result.worstCaseMax !== baseResult.worstCaseMax)
@@ -47,13 +48,22 @@ export function ResultsPanel({ result, baseResult, rows, specLimits, isValid, er
           >
             {isValid ? "Valid" : "Blocked"}
           </span>
-          <button
-            type="button"
-            onClick={onExportPdf}
-            className="border border-neutral-900 bg-neutral-900 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-neutral-800"
-          >
-            Export PDF
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={onExportJson}
+              className="border border-neutral-900 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-900 transition hover:bg-neutral-100"
+            >
+              Export JSON
+            </button>
+            <button
+              type="button"
+              onClick={onExportPdf}
+              className="border border-neutral-900 bg-neutral-900 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-neutral-800"
+            >
+              Export PDF
+            </button>
+          </div>
         </div>
       </div>
 

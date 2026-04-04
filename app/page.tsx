@@ -7,7 +7,7 @@ import { MonteCarloPanel } from "../components/MonteCarloPanel";
 import { StackTable } from "../components/StackTable";
 import { useCsvImportExport } from "../hooks/useCsvImportExport";
 import { useMonteCarloState } from "../hooks/useMonteCarloState";
-import { usePdfExport } from "../hooks/usePdfExport";
+import { useReportExport } from "../hooks/useReportExport";
 import { useStackupRows } from "../hooks/useStackupRows";
 import { useWhatIfScenario } from "../hooks/useWhatIfScenario";
 import { calculateStackup } from "../lib/stackup";
@@ -41,7 +41,7 @@ export default function Home() {
     rows,
     onRowsImported: replaceRows
   });
-  const { exportPdfReport } = usePdfExport({
+  const { exportPdfReport, exportJsonReport } = useReportExport({
     rows,
     validation,
     result,
@@ -130,6 +130,7 @@ export default function Home() {
             errors={validation.errors}
             zeroToleranceRows={zeroToleranceRows}
             onExportPdf={exportPdfReport}
+            onExportJson={exportJsonReport}
           />
         </div>
       </section>
