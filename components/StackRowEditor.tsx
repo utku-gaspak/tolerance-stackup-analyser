@@ -13,6 +13,10 @@ export function StackRowEditor({ index, row, onChangeRow, onDeleteRow, errors = 
   const hasErrors = Object.keys(errors).length > 0;
   const zebra = index % 2 === 0 ? "bg-white" : "bg-slate-50";
   const contribution = formatSignedContribution(row.nominal, row.direction);
+  const zeroToleranceInfo = isZeroToleranceRow(row)
+    ? "Zero tolerance keeps this row fixed at nominal in worst-case and Monte Carlo."
+    : null;
+  const hasInfoRow = hasErrors || zeroToleranceInfo !== null;
 
   return (
     <Fragment>
@@ -75,7 +79,7 @@ export function StackRowEditor({ index, row, onChangeRow, onDeleteRow, errors = 
         </td>
       </tr>
 
-      {hasErrors ? (
+      {hasInfoRow ? (
         <tr className="border-b border-neutral-900 bg-neutral-100">
           <td colSpan={8} className="px-3 py-2 text-xs leading-5 text-neutral-700">
             <div className="flex flex-wrap gap-x-4 gap-y-1">
@@ -84,6 +88,9 @@ export function StackRowEditor({ index, row, onChangeRow, onDeleteRow, errors = 
                   {message}
                 </span>
               ))}
+              {zeroToleranceInfo ? (
+                <span className="border border-neutral-900 bg-white px-2 py-1">{zeroToleranceInfo}</span>
+              ) : null}
             </div>
           </td>
         </tr>
@@ -161,4 +168,11 @@ function formatSignedContribution(nominal: string, direction: StackRow["directio
   }
 
   return numeric;
+}
+
+function isZeroToleranceRow(row: StackRow): boolean {
+  const plusTolerance = Number(row.plusTolerance.trim());
+  const minusTolerance = Number(row.minusTolerance.trim());
+
+  return Number.isFinite(plusTolerance) && Number.isFinite(minusTolerance) && plusTolerance === 0 && minusTolerance === 0;
 }

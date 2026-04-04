@@ -175,6 +175,30 @@ export function StackTable({
         </div>
       </div>
 
+      <div className="mt-4 border border-neutral-900 bg-neutral-100 p-3 text-xs leading-5 text-neutral-700">
+        <div className="flex items-center justify-between gap-4 border-b border-neutral-900 pb-2">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Input guide</p>
+            <h3 className="mt-1 text-sm font-semibold tracking-tight text-neutral-950">Validation rules</h3>
+          </div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Always active</p>
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <div className="border border-neutral-900 bg-white p-2">
+            Label is required and nominal must be a valid number.
+          </div>
+          <div className="border border-neutral-900 bg-white p-2">
+            Upper and lower tolerances must be non-negative numbers. `0.00` is allowed.
+          </div>
+          <div className="border border-neutral-900 bg-white p-2">
+            Select `+` to add a row to the stack or `-` to subtract it.
+          </div>
+          <div className="border border-neutral-900 bg-white p-2">
+            Zero-tolerance rows stay fixed at nominal and are still valid.
+          </div>
+        </div>
+      </div>
+
       <div className="mt-4 overflow-hidden border border-neutral-900">
         <div className="overflow-x-auto">
           <table className="w-full table-fixed border-collapse">
