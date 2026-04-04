@@ -7,8 +7,8 @@ import { StackRowEditor } from "./StackRowEditor";
 
 interface StackTableProps {
   rows: StackRow[];
-  presetLabels: readonly string[];
-  onLoadPreset: (preset: string) => void;
+  presetLabels: readonly ["V-01", "V-02", "V-03"];
+  onLoadPreset: (preset: "V-01" | "V-02" | "V-03") => void;
   onChangeRow: (id: string, field: keyof StackRow, value: string) => void;
   onDeleteRow: (id: string) => void;
   onAddRow: () => void;
