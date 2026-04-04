@@ -11,6 +11,11 @@ export interface SensitivityItem {
   worstCaseShare: number;
 }
 
+export interface SensitivityDominanceWarning {
+  title: string;
+  message: string;
+}
+
 export function calculateSensitivityAnalysis(rows: ParsedStackRow[]): SensitivityItem[] {
   const totalRssContribution = rows.reduce((sum, row) => {
     const effectiveTolerance = (row.plusTolerance + row.minusTolerance) / 2;
@@ -37,4 +42,36 @@ export function calculateSensitivityAnalysis(rows: ParsedStackRow[]): Sensitivit
       };
     })
     .sort((a, b) => b.rssShare - a.rssShare || b.worstCaseShare - a.worstCaseShare || a.label.localeCompare(b.label));
+}
+
+export function getSensitivityDominanceWarning(
+  items: SensitivityItem[]
+): SensitivityDominanceWarning | null {
+  const topItem = items[0];
+  const secondItem = items[1];
+
+  if (!topItem) {
+    return null;
+  }
+
+  if (topItem.rssShare >= 0.5) {
+    return {
+      title: "Single-row dominance",
+      message: `${topItem.label} drives ${formatPercent(topItem.rssShare)} of RSS contribution. Tightening this row should have the largest effect on stack variation.`
+    };
+  }
+
+  const topTwoShare = topItem.rssShare + (secondItem?.rssShare ?? 0);
+  if (topTwoShare >= 0.75) {
+    return {
+      title: "Two-row dominance",
+      message: `${topItem.label}${secondItem ? ` and ${secondItem.label}` : ""} drive ${formatPercent(topTwoShare)} of RSS contribution together. Focus improvement work there first.`
+    };
+  }
+
+  return null;
+}
+
+function formatPercent(value: number): string {
+  return `${(value * 100).toFixed(1)}%`;
 }

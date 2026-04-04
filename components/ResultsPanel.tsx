@@ -1,7 +1,7 @@
 import type { RowValidationError } from "../lib/types";
 import { formatEngineeringValue } from "../lib/units";
 import type { EngineeringUnit, ParsedStackRow, SavedStackVariant, StackCalculationResult } from "../lib/types";
-import { calculateSensitivityAnalysis } from "../lib/sensitivity";
+import { calculateSensitivityAnalysis, getSensitivityDominanceWarning } from "../lib/sensitivity";
 import type { VariantComparisonSummary } from "../lib/variant-comparison";
 import type { MonteCarloSpecLimits } from "../lib/monte-carlo";
 import { evaluateSpecLimits } from "../lib/spec-limits";
@@ -48,6 +48,7 @@ export function ResultsPanel({
   engineeringUnit
 }: ResultsPanelProps) {
   const sensitivityItems = isValid ? calculateSensitivityAnalysis(rows).slice(0, 5) : [];
+  const sensitivityWarning = getSensitivityDominanceWarning(sensitivityItems);
   const specCheck = evaluateSpecLimits(result, specLimits);
   const comparisonCards = result && baseResult && (result.rssTolerance !== baseResult.rssTolerance || result.worstCaseMin !== baseResult.worstCaseMin || result.worstCaseMax !== baseResult.worstCaseMax)
     ? [
@@ -292,6 +293,12 @@ export function ResultsPanel({
                 </div>
               ))}
             </div>
+            {sensitivityWarning ? (
+              <div className="mt-3 border border-neutral-900 bg-neutral-100 p-2.5 text-xs leading-5 text-neutral-800">
+                <p className="font-semibold uppercase tracking-[0.16em] text-neutral-700">{sensitivityWarning.title}</p>
+                <p className="mt-1">{sensitivityWarning.message}</p>
+              </div>
+            ) : null}
             <p className="mt-3 text-xs leading-5 text-neutral-600">
               Ranked by RSS contribution share. Rows with the largest share are the best candidates for tightening.
             </p>
