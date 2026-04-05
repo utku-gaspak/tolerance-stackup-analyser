@@ -10,12 +10,16 @@
     "typecheck": "tsc --noEmit",
     "check": "npm run lint && npm run typecheck && npm test",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "shots": "node scripts/capture-screenshots.mjs",
+    "pdf": "node scripts/export-pdf.mjs",
+    "review:artifacts": "bash scripts/review-artifacts.sh"
   },
   "dependencies": {
+    "@next/third-parties": "^15.5.14",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",
-    "next": "^15.3.0",
+    "next": "^15.5.14",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -27,6 +31,7 @@
     "autoprefixer": "^10.4.0",
     "eslint": "^9.39.4",
     "eslint-config-next": "^15.5.14",
+    "playwright": "^1.59.1",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.6.0",

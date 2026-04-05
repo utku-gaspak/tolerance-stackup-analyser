@@ -158,6 +158,51 @@ npm run start
 - `npm test` - run the Vitest suite
 - `npm run test:watch` - run tests in watch mode
 
+## Review Automation
+
+Use the review scripts to generate desktop screenshots, mobile screenshots, and a PDF export for UI review or regression checks.
+
+Scripts:
+
+- `scripts/capture-screenshots.mjs`
+- `scripts/export-pdf.mjs`
+- `scripts/review-artifacts.sh`
+
+NPM commands:
+
+- `npm run shots`
+- `npm run pdf`
+- `npm run review:artifacts`
+
+Local usage:
+
+```bash
+npm run dev
+```
+
+In another terminal:
+
+```bash
+BASE_URL=http://localhost:3000 npm run review:artifacts
+```
+
+When using `http://localhost:3000`, the dev server must already be running.
+
+Production usage:
+
+```bash
+BASE_URL=https://tolstackup.com npm run review:artifacts
+```
+
+In that case, no local dev server is needed.
+
+Output files are written to:
+
+- `artifacts/screenshots/`
+- `artifacts/downloads/`
+
+Generated screenshots, PDFs, and other review artifacts are local outputs only and should not be committed.
+
 ## How To Use
 
 1. Choose `mm` or `in` from the unit toggle.
