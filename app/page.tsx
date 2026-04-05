@@ -103,6 +103,12 @@ export default function Home() {
     saveCurrentVariant(rows, result, engineeringUnit);
   }
 
+  function toggleAllHelpers() {
+    const shouldOpen = !isQuickStartOpen || !isAdvancedPanelsOpen;
+    setIsQuickStartOpen(shouldOpen);
+    setIsAdvancedPanelsOpen(shouldOpen);
+  }
+
   return (
     <main className="mx-auto flex min-h-screen w-full flex-col gap-5 px-4 py-6 sm:px-6 lg:px-8">
       <section className="flex flex-col gap-3 border border-neutral-900 bg-white p-5 lg:p-6">
@@ -144,23 +150,40 @@ export default function Home() {
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-700">Workspace toolbar</p>
             <p className="text-[10.5px] leading-[1.1rem] text-neutral-700">
-              Toggle the Quick Start panel and advanced reference panels without changing the main three-panel workspace below.
+              Open the helper panels you need, or reveal everything at once without touching the main three-panel workspace below.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => setIsQuickStartOpen((current) => !current)}
-              className="border border-neutral-900 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-900 transition hover:bg-neutral-50"
+              onClick={toggleAllHelpers}
+              className="border border-neutral-900 bg-neutral-900 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-neutral-800"
             >
-              {isQuickStartOpen ? "Hide Quick Start" : "Show Quick Start"}
+              {isQuickStartOpen && isAdvancedPanelsOpen ? "Hide All Helpers" : "Show All Helpers"}
             </button>
             <button
               type="button"
               onClick={() => setIsAdvancedPanelsOpen((current) => !current)}
-              className="border border-neutral-900 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-900 transition hover:bg-neutral-50"
+              aria-pressed={isAdvancedPanelsOpen}
+              className={`border px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition ${
+                isAdvancedPanelsOpen
+                  ? "border-neutral-900 bg-neutral-900 text-white hover:bg-neutral-800"
+                  : "border-neutral-900 bg-white text-neutral-900 hover:bg-neutral-50"
+              }`}
             >
               {isAdvancedPanelsOpen ? "Hide Advanced Panels" : "Show Advanced Panels"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsQuickStartOpen((current) => !current)}
+              aria-pressed={isQuickStartOpen}
+              className={`border px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition ${
+                isQuickStartOpen
+                  ? "border-neutral-900 bg-neutral-900 text-white hover:bg-neutral-800"
+                  : "border-neutral-900 bg-white text-neutral-900 hover:bg-neutral-50"
+              }`}
+            >
+              {isQuickStartOpen ? "Hide Quick Start" : "Show Quick Start"}
             </button>
           </div>
         </div>
