@@ -6,6 +6,28 @@ Live app: https://tolstackup.com
 
 The UI is intentionally industrial and worksheet-like: black/white/gray, compact tables, explicit borders, and panel-based engineering output.
 
+## Status
+
+Core MVP roadmap completed.
+
+This release closes the initial product polish phase:
+
+- core UX cleanup completed
+- helper/reference panel visibility improved
+- review automation added
+- PDF export stabilized
+- GA4 added with working consent flow
+- privacy policy and privacy settings added
+
+The project is now in a stable niche MVP state.
+
+Future work should be treated as:
+
+- maintenance
+- bug fixes
+- optional feature expansion
+- productization work
+
 ## Overview
 
 This app models a linear stack of dimensions and evaluates it with deterministic and statistical methods.
