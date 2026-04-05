@@ -119,7 +119,7 @@ export function MonteCarloPanel({
       <div className="flex items-start justify-between gap-4 border-b border-neutral-900 pb-3">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Monte Carlo</p>
-          <h2 className="mt-1 text-lg font-semibold tracking-tight text-neutral-950">Distribution estimate</h2>
+          <h2 className="mt-1 text-lg font-semibold tracking-tight text-neutral-950">Sampled distribution</h2>
         </div>
         <div className="flex flex-col items-end gap-2">
           <span className={`border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${isValid ? "border-neutral-900 bg-neutral-100 text-neutral-900" : "border-neutral-900 bg-white text-neutral-900"}`}>
@@ -155,8 +155,8 @@ export function MonteCarloPanel({
       </div>
 
       <div className="mt-3 border border-neutral-900 bg-neutral-100 p-3 text-xs leading-5 text-neutral-700">
-        Set optional lower and upper spec limits to calculate yield. The pass rate is the share of Monte Carlo samples
-        that stay inside that band, not a deterministic acceptance proof.
+        Set optional lower and upper spec limits to estimate yield. Pass rate is the share of samples inside that band,
+        not a deterministic acceptance proof.
       </div>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -189,8 +189,8 @@ export function MonteCarloPanel({
       </div>
 
       <div className="mt-3 text-xs leading-5 text-neutral-600">
-        Monte Carlo uses a normal sample around each nominal with sigma approximated as average tolerance / 3, then
-        clips each draw to that row&apos;s tolerance bounds. It is an estimate of distribution shape, not a guarantee.
+        Monte Carlo uses a normal sample around each nominal, with sigma approximated as average tolerance / 3, then
+        clips each draw to that row&apos;s tolerance bounds.
       </div>
 
       {!isValid ? (

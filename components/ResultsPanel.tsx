@@ -68,7 +68,7 @@ export function ResultsPanel({
       <div className="flex items-start justify-between gap-4 border-b border-neutral-900 pb-3">
         <div>
           <h2 className="text-lg font-semibold tracking-tight text-neutral-950">Results</h2>
-          <p className="mt-1 text-sm text-neutral-700">F-01 total nominal, F-02 worst-case, and F-03 RSS approximation.</p>
+          <p className="mt-1 text-sm text-neutral-700">Deterministic totals and RSS approximation.</p>
         </div>
         <div className="flex flex-col items-end gap-2">
           <span
@@ -220,8 +220,8 @@ export function ResultsPanel({
 
       <div className="mt-4 space-y-4">
         <div className="border border-neutral-900 bg-neutral-100 p-3 text-sm leading-6 text-neutral-700">
-          Worst-case is deterministic and conservative. RSS is an approximation built from each row&apos;s average
-          tolerance width and assumes independent contributors.
+          Worst-case is deterministic and conservative. RSS is an estimate built from each row&apos;s average tolerance
+          width and independent contributors.
         </div>
 
         <div className="border border-neutral-900 bg-white p-3 text-xs leading-5 text-neutral-600">

@@ -141,7 +141,7 @@ export function StackTable({
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">V-01 to V-03</p>
         </div>
         <p className="mt-3 text-xs leading-5 text-neutral-700">
-          Use these presets to start from the documented reference cases before editing rows manually.
+          Load the documented validation cases before editing rows manually.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {presetLabels.map((preset) => (
@@ -206,7 +206,7 @@ export function StackTable({
         onToggle={() => setIsInputGuideOpen((current) => !current)}
         toggleLabelOpen="Hide Input Guide"
         toggleLabelClosed="Show Input Guide"
-        summary="Collapsed help remains available for labels, numeric input, direction, and zero-tolerance rows."
+        summary="Collapsed help covers labels, numeric input, direction, and zero-tolerance rows."
       >
         <div className="grid gap-2 sm:grid-cols-2">
           <div className="border border-neutral-900 bg-white p-2">
@@ -232,7 +232,7 @@ export function StackTable({
         onToggle={() => setIsWhatIfPreviewOpen((current) => !current)}
         toggleLabelOpen="Hide What-if Preview"
         toggleLabelClosed="Show What-if Preview"
-        summary="Scenario controls stay available for global scaling and row-level tolerance previews."
+        summary="Scenario controls stay available for global scaling and row-level previews."
       >
         <label className="block">
           <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-600">Global tolerance scale</span>
@@ -255,7 +255,7 @@ export function StackTable({
               <div key={row.id} className="grid gap-2 rounded border border-neutral-900 bg-neutral-100 p-2 sm:grid-cols-[minmax(0,1fr)_10rem_4rem] sm:items-center">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-700">{row.label}</p>
-                  <p className="mt-1 text-[11px] leading-5 text-neutral-600">Row scale for local tolerance what-if.</p>
+                  <p className="mt-1 text-[11px] leading-5 text-neutral-600">Local tolerance scale for this row.</p>
                 </div>
                 <input
                   type="range"

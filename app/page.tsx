@@ -144,7 +144,7 @@ export default function Home() {
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-700">Workspace toolbar</p>
             <p className="text-[10.5px] leading-[1.1rem] text-neutral-700">
-              Control onboarding and advanced reference visibility without affecting the main three-panel workspace below.
+              Show or hide Quick Start and advanced reference panels without affecting the main workflow below.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
