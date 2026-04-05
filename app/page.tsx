@@ -24,6 +24,7 @@ const PRESET_LABELS = ["V-01", "V-02", "V-03"] as const;
 export default function Home() {
   const [engineeringUnit, setEngineeringUnit] = useState<EngineeringUnit>("mm");
   const [isQuickStartOpen, setIsQuickStartOpen] = useState(false);
+  const [isAdvancedPanelsOpen, setIsAdvancedPanelsOpen] = useState(false);
   const { monteCarloResult, setMonteCarloResult, specLimits, setSpecLimits } = useMonteCarloState();
   const {
     savedVariants,
@@ -143,16 +144,25 @@ export default function Home() {
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-700">Workspace toolbar</p>
             <p className="text-[10.5px] leading-[1.1rem] text-neutral-700">
-              Toggle the Quick Start panel without changing the main three-panel workspace below.
+              Toggle the Quick Start panel and advanced reference panels without changing the main three-panel workspace below.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsQuickStartOpen((current) => !current)}
-            className="border border-neutral-900 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-900 transition hover:bg-neutral-50"
-          >
-            {isQuickStartOpen ? "Hide Quick Start" : "Show Quick Start"}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setIsQuickStartOpen((current) => !current)}
+              className="border border-neutral-900 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-900 transition hover:bg-neutral-50"
+            >
+              {isQuickStartOpen ? "Hide Quick Start" : "Show Quick Start"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsAdvancedPanelsOpen((current) => !current)}
+              className="border border-neutral-900 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-900 transition hover:bg-neutral-50"
+            >
+              {isAdvancedPanelsOpen ? "Hide Advanced Panels" : "Show Advanced Panels"}
+            </button>
+          </div>
         </div>
       </section>
 
@@ -208,13 +218,15 @@ export default function Home() {
         />
       </section>
 
-      <section className="grid gap-5 2xl:grid-cols-[1.4fr_1fr]">
-        <FormulaPanel rows={rows} compact />
+      {isAdvancedPanelsOpen ? (
+        <section className="grid gap-5 2xl:grid-cols-[1.4fr_1fr]">
+          <FormulaPanel rows={rows} compact />
 
-        <div className="grid gap-5 content-start">
-          <CurrentStackExpressionPanel rows={rows} />
-        </div>
-      </section>
+          <div className="grid gap-5 content-start">
+            <CurrentStackExpressionPanel rows={rows} />
+          </div>
+        </section>
+      ) : null}
 
       <footer className="border-t border-neutral-900 pt-4 text-xs text-neutral-700">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
