@@ -229,11 +229,21 @@ export default function Home() {
       </section>
 
       {isAdvancedPanelsOpen ? (
-        <section className="grid gap-5 2xl:grid-cols-[1.4fr_1fr]">
-          <FormulaPanel rows={rows} compact />
+        <section className="border border-neutral-900 bg-neutral-50 p-4">
+          <div className="flex items-start justify-between gap-4 border-b border-neutral-900 pb-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-700">Reference panels</p>
+              <h2 className="mt-1 text-sm font-semibold tracking-tight text-neutral-950">Formula Reference and current expression</h2>
+            </div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Shown with Advanced Panels</p>
+          </div>
 
-          <div className="grid gap-5 content-start">
-            <CurrentStackExpressionPanel rows={rows} />
+          <div className="mt-4 grid gap-4 2xl:grid-cols-[1.4fr_1fr]">
+            <FormulaPanel rows={rows} compact />
+
+            <div className="grid gap-4 content-start">
+              <CurrentStackExpressionPanel rows={rows} />
+            </div>
           </div>
         </section>
       ) : null}
