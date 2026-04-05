@@ -34,6 +34,31 @@ export function downloadPdfReport(input: PdfReportInput): void {
   doc.setTextColor(0, 0, 0);
   doc.setDrawColor(0, 0, 0);
 
+  const executiveSummaryBody =
+    report.summaryMetrics.length > 0
+      ? report.summaryMetrics.map((metric) => [metric.label, metric.value])
+      : [["Status", "No deterministic results available"]];
+  const validationSummaryBody = report.validationSummary.map((item) => [item.label, item.value]);
+  const validationErrorsBody = report.validationErrors.map((error) => [error.row, error.field, error.message]);
+  const stackDefinitionBody = report.rows.map((row) => [
+    row.index,
+    row.label,
+    row.direction,
+    row.nominal,
+    row.plusTolerance,
+    row.minusTolerance,
+    row.contribution
+  ]);
+  const deterministicResultsBody =
+    report.summaryMetrics.length > 0
+      ? report.summaryMetrics.map((metric) => [metric.label, metric.value])
+      : [["Status", "No deterministic results available"]];
+  const monteCarloSummaryBody =
+    report.monteCarlo.summary.length > 0
+      ? report.monteCarlo.summary.map((metric) => [metric.label, metric.value])
+      : [["Status", report.monteCarlo.note]];
+  const notesBody = report.notes.map((note) => [note]);
+
   cursorY = renderTableSection(doc, {
     title: "Executive Summary",
     cursorY,
@@ -41,12 +66,9 @@ export function downloadPdfReport(input: PdfReportInput): void {
     right: pageWidth - right,
     pageHeight,
     margin: tableMargin,
-    body:
-      report.summaryMetrics.length > 0
-        ? report.summaryMetrics.map((metric) => [metric.label, metric.value])
-        : [["Status", "No deterministic results available"]],
+    body: executiveSummaryBody,
     head: [["Metric", "Value"]],
-    requiredHeight: estimateSectionBlockHeight(1, DEFAULT_TABLE_ROW_HEIGHT),
+    requiredHeight: estimateSectionBlockHeight(executiveSummaryBody.length, DEFAULT_TABLE_ROW_HEIGHT),
     options: {
       styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2 },
       headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
@@ -60,9 +82,9 @@ export function downloadPdfReport(input: PdfReportInput): void {
     right: pageWidth - right,
     pageHeight,
     margin: tableMargin,
-    body: report.validationSummary.map((item) => [item.label, item.value]),
+    body: validationSummaryBody,
     head: [["Field", "Value"]],
-    requiredHeight: estimateSectionBlockHeight(1, DEFAULT_TABLE_ROW_HEIGHT),
+    requiredHeight: estimateSectionBlockHeight(validationSummaryBody.length, DEFAULT_TABLE_ROW_HEIGHT),
     options: {
       styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2 },
       headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
@@ -70,7 +92,7 @@ export function downloadPdfReport(input: PdfReportInput): void {
     }
   });
 
-  if (report.validationErrors.length > 0) {
+  if (validationErrorsBody.length > 0) {
     cursorY = renderTableSection(doc, {
       title: "Validation Errors",
       cursorY,
@@ -78,9 +100,9 @@ export function downloadPdfReport(input: PdfReportInput): void {
       right: pageWidth - right,
       pageHeight,
       margin: tableMargin,
-      body: report.validationErrors.map((error) => [error.row, error.field, error.message]),
+      body: validationErrorsBody,
       head: [["Row", "Field", "Message"]],
-      requiredHeight: estimateSectionBlockHeight(1, 8.5),
+      requiredHeight: estimateSectionBlockHeight(validationErrorsBody.length, 8.5),
       options: {
         styles: { font: "helvetica", fontSize: 8.5, cellPadding: 2, textColor: 20, lineColor: 0, lineWidth: 0.2 },
         headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" }
@@ -95,9 +117,9 @@ export function downloadPdfReport(input: PdfReportInput): void {
     right: pageWidth - right,
     pageHeight,
     margin: tableMargin,
-    body: report.rows.map((row) => [row.index, row.label, row.direction, row.nominal, row.plusTolerance, row.minusTolerance, row.contribution]),
+    body: stackDefinitionBody,
     head: [["#", "Label", "Dir", "Nominal", "+Tol", "-Tol", "Contribution"]],
-    requiredHeight: estimateSectionBlockHeight(1, 8.5),
+    requiredHeight: estimateSectionBlockHeight(stackDefinitionBody.length, 8.5),
     options: {
       styles: { font: "helvetica", fontSize: 8.5, cellPadding: 1.9, textColor: 20, lineColor: 0, lineWidth: 0.2 },
       headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
@@ -135,12 +157,9 @@ export function downloadPdfReport(input: PdfReportInput): void {
     right: pageWidth - right,
     pageHeight,
     margin: tableMargin,
-    body:
-      report.summaryMetrics.length > 0
-        ? report.summaryMetrics.map((metric) => [metric.label, metric.value])
-        : [["Status", "No deterministic results available"]],
+    body: deterministicResultsBody,
     head: [["Metric", "Value"]],
-    requiredHeight: estimateSectionBlockHeight(1, DEFAULT_TABLE_ROW_HEIGHT),
+    requiredHeight: estimateSectionBlockHeight(deterministicResultsBody.length, DEFAULT_TABLE_ROW_HEIGHT),
     spacing: TITLE_SPACING,
     options: {
       styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2 },
@@ -155,12 +174,9 @@ export function downloadPdfReport(input: PdfReportInput): void {
     right: pageWidth - right,
     pageHeight,
     margin: tableMargin,
-    body:
-      report.monteCarlo.summary.length > 0
-        ? report.monteCarlo.summary.map((metric) => [metric.label, metric.value])
-        : [["Status", report.monteCarlo.note]],
+    body: monteCarloSummaryBody,
     head: [["Metric", "Value"]],
-    requiredHeight: estimateSectionBlockHeight(1, DEFAULT_TABLE_ROW_HEIGHT),
+    requiredHeight: estimateSectionBlockHeight(monteCarloSummaryBody.length, DEFAULT_TABLE_ROW_HEIGHT),
     options: {
       styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2 },
       headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
@@ -187,9 +203,9 @@ export function downloadPdfReport(input: PdfReportInput): void {
     right: pageWidth - right,
     pageHeight,
     margin: tableMargin,
-    body: report.notes.map((note) => [note]),
+    body: notesBody,
     head: [["Note"]],
-    requiredHeight: estimateTableBlockHeight(report.notes.length, 5),
+    requiredHeight: estimateTableBlockHeight(notesBody.length, 6.5),
     options: {
       styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2, valign: "top" },
       headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
@@ -268,6 +284,8 @@ function renderTableSection(
     ...options,
     startY: tableY,
     margin,
+    pageBreak: "avoid",
+    rowPageBreak: "avoid",
     theme: "grid",
     head,
     body
