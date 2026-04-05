@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type ChangeEvent } from "react";
+import { useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import { formatEngineeringValue } from "../lib/units";
 import type { EngineeringUnit, RowValidationError, StackDirection, StackRow } from "../lib/types";
 import { StackRowEditor } from "./StackRowEditor";
@@ -43,6 +43,8 @@ export function StackTable({
   engineeringUnit
 }: StackTableProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isInputGuideOpen, setIsInputGuideOpen] = useState(false);
+  const [isWhatIfPreviewOpen, setIsWhatIfPreviewOpen] = useState(false);
   const equationTokens = rows.map((row, index) => ({
     index: index + 1,
     signedNominal: formatSignedNominal(row.nominal, row.direction)
@@ -196,15 +198,17 @@ export function StackTable({
         </div>
       </div>
 
-      <div className="mt-4 border border-neutral-900 bg-neutral-100 p-3 text-xs leading-5 text-neutral-700">
-        <div className="flex items-center justify-between gap-4 border-b border-neutral-900 pb-2">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Input guide</p>
-            <h3 className="mt-1 text-sm font-semibold tracking-tight text-neutral-950">Validation rules</h3>
-          </div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">Always active</p>
-        </div>
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+      <CollapsibleHelperBlock
+        title="Input guide"
+        subtitle="Validation rules"
+        badge="Always active"
+        isOpen={isInputGuideOpen}
+        onToggle={() => setIsInputGuideOpen((current) => !current)}
+        toggleLabelOpen="Hide Input Guide"
+        toggleLabelClosed="Show Input Guide"
+        summary="Collapsed help remains available for labels, numeric input, direction, and zero-tolerance rows."
+      >
+        <div className="grid gap-2 sm:grid-cols-2">
           <div className="border border-neutral-900 bg-white p-2">
             Label is required and nominal must be a valid number.
           </div>
@@ -218,20 +222,19 @@ export function StackTable({
             Zero-tolerance rows stay fixed at nominal and are still valid.
           </div>
         </div>
-      </div>
+      </CollapsibleHelperBlock>
 
-      <div className="mt-4 border border-neutral-900 bg-white p-3">
-        <div className="flex items-start justify-between gap-4 border-b border-neutral-900 pb-2">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-700">What-if preview</p>
-            <p className="mt-1 text-sm text-neutral-700">Scale tolerances globally or row-by-row without changing the base stack.</p>
-          </div>
-          <div className="border border-neutral-900 bg-neutral-100 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-800 tabular-nums">
-            {whatIfGlobalPercent}% global
-          </div>
-        </div>
-
-        <label className="mt-3 block">
+      <CollapsibleHelperBlock
+        title="What-if preview"
+        subtitle={`Scale tolerances globally or row-by-row without changing the base stack.`}
+        badge={`${whatIfGlobalPercent}% global`}
+        isOpen={isWhatIfPreviewOpen}
+        onToggle={() => setIsWhatIfPreviewOpen((current) => !current)}
+        toggleLabelOpen="Hide What-if Preview"
+        toggleLabelClosed="Show What-if Preview"
+        summary="Scenario controls stay available for global scaling and row-level tolerance previews."
+      >
+        <label className="block">
           <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-600">Global tolerance scale</span>
           <input
             type="range"
@@ -270,8 +273,53 @@ export function StackTable({
             );
           })}
         </div>
-      </div>
+      </CollapsibleHelperBlock>
     </section>
+  );
+}
+
+function CollapsibleHelperBlock({
+  title,
+  subtitle,
+  badge,
+  isOpen,
+  onToggle,
+  toggleLabelOpen,
+  toggleLabelClosed,
+  summary,
+  children
+}: {
+  title: string;
+  subtitle: string;
+  badge: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  toggleLabelOpen: string;
+  toggleLabelClosed: string;
+  summary: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="mt-4 border border-neutral-900 bg-neutral-100 p-3 text-xs leading-5 text-neutral-700">
+      <div className="flex items-start justify-between gap-4 border-b border-neutral-900 pb-2">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">{title}</p>
+          <h3 className="mt-1 text-sm font-semibold tracking-tight text-neutral-950">{subtitle}</h3>
+        </div>
+        <div className="flex flex-col items-end gap-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-700">{badge}</p>
+          <button
+            type="button"
+            onClick={onToggle}
+            className="border border-neutral-900 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-900 transition hover:bg-neutral-50"
+          >
+            {isOpen ? toggleLabelOpen : toggleLabelClosed}
+          </button>
+        </div>
+      </div>
+
+      {isOpen ? <div className="mt-3">{children}</div> : <p className="mt-3 text-[11px] leading-5 text-neutral-600">{summary}</p>}
+    </div>
   );
 }
 
