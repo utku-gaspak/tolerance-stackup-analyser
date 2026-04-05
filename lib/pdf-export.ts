@@ -58,6 +58,7 @@ export function downloadPdfReport(input: PdfReportInput): void {
       ? report.monteCarlo.summary.map((metric) => [metric.label, metric.value])
       : [["Status", report.monteCarlo.note]];
   const notesBody = report.notes.map((note) => [note]);
+  const notesBlockHeight = estimateTableBlockHeight(notesBody.length, 6.5);
 
   cursorY = renderTableSection(doc, {
     title: "Executive Summary",
@@ -177,6 +178,7 @@ export function downloadPdfReport(input: PdfReportInput): void {
     body: monteCarloSummaryBody,
     head: [["Metric", "Value"]],
     requiredHeight: estimateSectionBlockHeight(monteCarloSummaryBody.length, DEFAULT_TABLE_ROW_HEIGHT),
+    reserveFollowingHeight: report.monteCarlo.histogram.length > 0 ? 0 : notesBlockHeight,
     options: {
       styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2 },
       headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
@@ -189,6 +191,7 @@ export function downloadPdfReport(input: PdfReportInput): void {
       doc,
       report.monteCarlo.histogram,
       report.monteCarlo.sampleCount,
+      notesBlockHeight,
       cursorY,
       left,
       pageWidth - right,
@@ -205,7 +208,7 @@ export function downloadPdfReport(input: PdfReportInput): void {
     margin: tableMargin,
     body: notesBody,
     head: [["Note"]],
-    requiredHeight: estimateTableBlockHeight(notesBody.length, 6.5),
+    requiredHeight: notesBlockHeight,
     options: {
       styles: { font: "helvetica", fontSize: 9, cellPadding: 2.2, textColor: 20, lineColor: 0, lineWidth: 0.2, valign: "top" },
       headStyles: { fillColor: [235, 235, 235], textColor: 0, fontStyle: "bold" },
@@ -243,9 +246,10 @@ function prepareSectionStart(
   cursorY: number,
   spacing: number,
   requiredHeight: number,
-  pageHeight: number
+  pageHeight: number,
+  reserveFollowingHeight = 0
 ): number {
-  const startY = placeSection(doc, cursorY + spacing, requiredHeight, pageHeight);
+  const startY = placeSection(doc, cursorY + spacing, requiredHeight + reserveFollowingHeight, pageHeight);
   return startY;
 }
 
@@ -261,6 +265,7 @@ function renderTableSection(
     head,
     body,
     requiredHeight,
+    reserveFollowingHeight = 0,
     spacing = SECTION_SPACING,
     options
   }: {
@@ -273,11 +278,12 @@ function renderTableSection(
     head: string[][];
     body: Array<Array<string | number>>;
     requiredHeight: number;
+    reserveFollowingHeight?: number;
     spacing?: number;
     options: Parameters<typeof autoTable>[1];
   }
 ): number {
-  const startY = prepareSectionStart(doc, cursorY, spacing, requiredHeight, pageHeight);
+  const startY = prepareSectionStart(doc, cursorY, spacing, requiredHeight, pageHeight, reserveFollowingHeight);
   const tableY = drawSectionHeading(doc, title, startY, left, right);
 
   autoTable(doc, {
@@ -298,6 +304,7 @@ function renderHistogramSection(
   doc: jsPDF,
   bins: Array<{ range: string; bar: string; count: string }>,
   sampleCount: number,
+  reserveFollowingHeight: number,
   cursorY: number,
   left: number,
   rightEdge: number,
@@ -308,7 +315,8 @@ function renderHistogramSection(
     cursorY,
     SECTION_SPACING,
     estimateHistogramBlockHeight(1, HISTOGRAM_ROW_HEIGHT),
-    pageHeight
+    pageHeight,
+    reserveFollowingHeight
   );
   y = drawSectionHeading(doc, "Histogram", y, left, rightEdge);
 
