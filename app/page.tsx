@@ -7,6 +7,7 @@ import { FormulaPanel } from "../components/FormulaPanel";
 import { MonteCarloPanel } from "../components/MonteCarloPanel";
 import { QuickStartPanel } from "../components/QuickStartPanel";
 import { StackTable } from "../components/StackTable";
+import Link from "next/link";
 import { useCsvImportExport } from "../hooks/useCsvImportExport";
 import { useMonteCarloState } from "../hooks/useMonteCarloState";
 import { useReportExport } from "../hooks/useReportExport";
@@ -267,6 +268,12 @@ export default function Home() {
             >
               utkugaspak@gmail.com
             </a>
+            <Link
+              href="/privacy"
+              className="font-medium text-neutral-950 underline decoration-neutral-400 decoration-1 underline-offset-2 hover:decoration-neutral-900"
+            >
+              Privacy Policy
+            </Link>
           </div>
         </div>
       </footer>
