@@ -7,6 +7,7 @@ import { FormulaPanel } from "../components/FormulaPanel";
 import { MonteCarloPanel } from "../components/MonteCarloPanel";
 import { QuickStartPanel } from "../components/QuickStartPanel";
 import { StackTable } from "../components/StackTable";
+import { useConsent } from "../components/ConsentProvider";
 import Link from "next/link";
 import { useCsvImportExport } from "../hooks/useCsvImportExport";
 import { useMonteCarloState } from "../hooks/useMonteCarloState";
@@ -23,6 +24,7 @@ import { validateStackRows } from "../lib/validation";
 const PRESET_LABELS = ["V-01", "V-02", "V-03"] as const;
 
 export default function Home() {
+  const { openConsentBanner } = useConsent();
   const [engineeringUnit, setEngineeringUnit] = useState<EngineeringUnit>("mm");
   const [isQuickStartOpen, setIsQuickStartOpen] = useState(false);
   const [isAdvancedPanelsOpen, setIsAdvancedPanelsOpen] = useState(false);
@@ -268,6 +270,13 @@ export default function Home() {
             >
               utkugaspak@gmail.com
             </a>
+            <button
+              type="button"
+              onClick={openConsentBanner}
+              className="font-medium text-neutral-950 underline decoration-neutral-400 decoration-1 underline-offset-2 hover:decoration-neutral-900"
+            >
+              Privacy settings
+            </button>
             <Link
               href="/privacy"
               className="font-medium text-neutral-950 underline decoration-neutral-400 decoration-1 underline-offset-2 hover:decoration-neutral-900"
